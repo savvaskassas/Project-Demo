@@ -156,7 +156,7 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
             value={formData.projectTitle}
             onChange={handleInputChange}
             className={errors.projectTitle ? 'error' : ''}
-            placeholder="Εισάγετε τον τίτλο του έργου"
+            placeholder="π.χ. Εγκατάσταση Υαλοπινάκων Κτιρίου Γραφείων"
           />
           {errors.projectTitle && <span className="error-message">{errors.projectTitle}</span>}
         </div>
@@ -171,7 +171,7 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
             value={formData.client}
             onChange={handleInputChange}
             className={errors.client ? 'error' : ''}
-            placeholder="Εισάγετε το όνομα του πελάτη"
+            placeholder="π.χ. Δήμος Ρόδου, Ιδιωτική Εταιρεία κλπ."
           />
           {errors.client && <span className="error-message">{errors.client}</span>}
         </div>
@@ -234,7 +234,7 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
               value={collaboratorInput}
               onChange={(e) => setCollaboratorInput(e.target.value)}
               onKeyPress={(e) => handleKeyPress(e, handleAddCollaborator)}
-              placeholder="Εισάγετε όνομα συνεργάτη"
+              placeholder="π.χ. Ιωάννης Παπαδόπουλος, Μαρία Γεωργίου"
               className={errors.assignedCollaborators ? 'error' : ''}
             />
             <button type="button" onClick={handleAddCollaborator} className="add-btn">

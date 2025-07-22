@@ -1,0 +1,195 @@
+.company-header {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: white;
+  padding: 20px 0;
+  border-bottom: 4px solid #ff7700;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.company-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(135, 206, 235, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-container {
+  position: relative;
+}
+
+.logo-circle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+  border: 3px solid #87ceeb;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo-circle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+}
+
+.logo-text-top {
+  font-size: 7px;
+  font-weight: bold;
+  color: #ff7700;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.logo-text-bottom {
+  font-size: 7px;
+  font-weight: bold;
+  color: #ff7700;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.logo-k {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff7700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-top: 2px;
+}
+
+.company-info {
+  margin-left: 15px;
+}
+
+.company-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(45deg, #ff7700, #ffaa44);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.company-tagline {
+  font-size: 0.9rem;
+  color: #87ceeb;
+  margin: 5px 0 0 0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  text-align: right;
+}
+
+.system-title h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.system-title p {
+  font-size: 0.85rem;
+  color: #b0b0b0;
+  margin: 5px 0 0 0;
+  font-weight: 300;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .logo-section {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .company-name {
+    font-size: 1.5rem;
+  }
+  
+  .system-title {
+    text-align: center;
+  }
+  
+  .logo-circle {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .logo-k {
+    font-size: 20px;
+  }
+  
+  .logo-text-top,
+  .logo-text-bottom {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .company-header {
+    padding: 15px 0;
+  }
+  
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .company-name {
+    font-size: 1.3rem;
+  }
+  
+  .system-title h2 {
+    font-size: 1.1rem;
+  }
+  
+  .logo-circle {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-k {
+    font-size: 18px;
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from './components/Header';
 import ProjectForm from './components/ProjectForm';
 // import { initializeApp } from 'firebase/app';
 // import { getFirestore, collection, addDoc } from 'firebase/firestore';
@@ -92,33 +93,24 @@ function App() {
 
   return (
     <div className="App">
-      <header style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1>Σύστημα Διαχείρισης Έργων</h1>
-        <p>Δημιουργήστε και διαχειριστείτε τα έργα σας</p>
-      </header>
+      <Header />
+      
+      <main className="main-content">
+        <ProjectForm onSubmit={handleProjectSubmit} />
 
-      <ProjectForm onSubmit={handleProjectSubmit} />
+        {isSubmitting && (
+          <div className="loading-message">
+            <div className="spinner"></div>
+            <p>Αποθήκευση έργου...</p>
+          </div>
+        )}
 
-      {isSubmitting && (
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <p>Αποθήκευση έργου...</p>
-        </div>
-      )}
-
-      {submitMessage && (
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: '20px',
-          padding: '10px',
-          backgroundColor: submitMessage.includes('επιτυχώς') ? '#d4edda' : '#f8d7da',
-          color: submitMessage.includes('επιτυχώς') ? '#155724' : '#721c24',
-          borderRadius: '5px',
-          maxWidth: '600px',
-          margin: '20px auto'
-        }}>
-          <p>{submitMessage}</p>
-        </div>
-      )}
+        {submitMessage && (
+          <div className={`message ${submitMessage.includes('επιτυχώς') ? 'success' : 'error'}`}>
+            <p>{submitMessage}</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
