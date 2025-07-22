@@ -113,7 +113,58 @@
 }
 
 .header-right {
-  text-align: right;
+  display: flex;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.user-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-role {
+  font-size: 0.8rem;
+  color: #87ceeb;
+  font-weight: 400;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .system-title h2 {
@@ -148,8 +199,18 @@
     font-size: 1.5rem;
   }
   
-  .system-title {
+  .header-right {
+    justify-content: center;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    gap: 15px;
     text-align: center;
+  }
+  
+  .user-details {
+    align-items: center;
   }
   
   .logo-circle {
@@ -180,8 +241,13 @@
     font-size: 1.3rem;
   }
   
-  .system-title h2 {
-    font-size: 1.1rem;
+  .user-info {
+    gap: 12px;
+  }
+  
+  .logout-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
   }
   
   .logo-circle {

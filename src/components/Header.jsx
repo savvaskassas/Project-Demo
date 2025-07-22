@@ -1,7 +1,7 @@
 import React from 'react';
 import './Header.css';
 
-const Header = () => {
+const Header = ({ user, onLogout }) => {
   return (
     <header className="company-header">
       <div className="header-content">
@@ -18,12 +18,20 @@ const Header = () => {
             <p className="company-tagline">Επαγγελματικές Υπηρεσίες Υαλοπινάκων</p>
           </div>
         </div>
-        <div className="header-right">
-          <div className="system-title">
-            <h2>Σύστημα Διαχείρισης Έργων</h2>
-            <p>Δημιουργία και διαχείριση έργων</p>
+        
+        {user && (
+          <div className="header-right">
+            <div className="user-info">
+              <div className="user-details">
+                <span className="user-name">👤 {user.name}</span>
+                <span className="user-role">{user.role === 'admin' ? 'Διαχειριστής' : 'Χρήστης'}</span>
+              </div>
+              <button className="logout-btn" onClick={onLogout}>
+                🚪 Αποσύνδεση
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
