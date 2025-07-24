@@ -146,6 +146,12 @@
   background: linear-gradient(135deg, #dc3545 0%, #e14eca 100%);
 }
 
+.days-remaining.completed {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
 .project-photos {
   font-size: 0.85rem;
   color: #666;

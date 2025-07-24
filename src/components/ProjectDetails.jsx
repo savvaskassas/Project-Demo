@@ -8,6 +8,7 @@ const ProjectDetails = ({
   onBack, 
   onEdit, 
   onDelete, 
+  onComplete,
   onAddItem, 
   onUpdateItem, 
   onDeleteItem 
@@ -51,7 +52,8 @@ const ProjectDetails = ({
       'Ανάπτυξη': '#ff7700',
       'Δοκιμές': '#dc3545',
       'Παράδοση': '#28a745',
-      'Συντήρηση': '#6f42c1'
+      'Συντήρηση': '#6f42c1',
+      'Ολοκληρωμένο': '#28a745'
     };
     return colors[stage] || '#6c757d';
   };
@@ -86,6 +88,11 @@ const ProjectDetails = ({
           ← Πίσω στα Έργα
         </button>
         <div className="project-actions">
+          {project.projectStage !== 'Ολοκληρωμένο' && (
+            <button className="complete-btn" onClick={onComplete}>
+              ✅ Ολοκλήρωση Έργου
+            </button>
+          )}
           <button className="edit-btn" onClick={onEdit}>
             ✏️ Επεξεργασία
           </button>

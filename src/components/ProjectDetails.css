@@ -38,7 +38,8 @@
 }
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.complete-btn {
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
@@ -46,6 +47,18 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.complete-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.complete-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
 }
 
 .edit-btn {

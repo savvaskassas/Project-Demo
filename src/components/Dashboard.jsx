@@ -110,6 +110,28 @@ const Dashboard = () => {
     }
   };
 
+  const handleCompleteProject = (projectId) => {
+    const updatedProjects = projects.map(project => {
+      if (project.id === projectId) {
+        return {
+          ...project,
+          projectStage: 'Ολοκληρωμένο',
+          updatedAt: new Date()
+        };
+      }
+      return project;
+    });
+    setProjects(updatedProjects);
+    
+    // Ενημέρωση του selectedProject αν είναι αυτό που ολοκληρώθηκε
+    if (selectedProject && selectedProject.id === projectId) {
+      setSelectedProject({
+        ...selectedProject,
+        projectStage: 'Ολοκληρωμένο'
+      });
+    }
+  };
+
   const handleAddItemToProject = (projectId, itemData) => {
     const updatedProjects = projects.map(project => {
       if (project.id === projectId) {
@@ -194,6 +216,7 @@ const Dashboard = () => {
               setCurrentView('edit');
             }}
             onDelete={() => handleDeleteProject(selectedProject.id)}
+            onComplete={() => handleCompleteProject(selectedProject.id)}
             onAddItem={(itemData) => handleAddItemToProject(selectedProject.id, itemData)}
             onUpdateItem={(itemId, updatedItem) => handleUpdateItem(selectedProject.id, itemId, updatedItem)}
             onDeleteItem={(itemId) => handleDeleteItem(selectedProject.id, itemId)}

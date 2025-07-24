@@ -10,7 +10,8 @@ const ProjectCard = ({ project, onClick }) => {
       'Ανάπτυξη': '#ff7700',
       'Δοκιμές': '#dc3545',
       'Παράδοση': '#28a745',
-      'Συντήρηση': '#6f42c1'
+      'Συντήρηση': '#6f42c1',
+      'Ολοκληρωμένο': '#28a745'
     };
     return colors[stage] || '#6c757d';
   };
@@ -19,7 +20,12 @@ const ProjectCard = ({ project, onClick }) => {
     return new Date(dateString).toLocaleDateString('el-GR');
   };
 
-  const getDaysRemaining = (endDate) => {
+  const getDaysRemaining = (endDate, projectStage) => {
+    // Αν το έργο είναι ολοκληρωμένο, δεν εμφανίζουμε καθυστέρηση
+    if (projectStage === 'Ολοκληρωμένο') {
+      return 'Ολοκληρωμένο';
+    }
+    
     const today = new Date();
     const end = new Date(endDate);
     const diffTime = end - today;
@@ -34,7 +40,12 @@ const ProjectCard = ({ project, onClick }) => {
     }
   };
 
-  const getDaysRemainingClass = (endDate) => {
+  const getDaysRemainingClass = (endDate, projectStage) => {
+    // Αν το έργο είναι ολοκληρωμένο, εμφανίζει πράσινο
+    if (projectStage === 'Ολοκληρωμένο') {
+      return 'completed';
+    }
+    
     const today = new Date();
     const end = new Date(endDate);
     const diffTime = end - today;
@@ -103,8 +114,8 @@ const ProjectCard = ({ project, onClick }) => {
       </div>
 
       <div className="project-card-footer">
-        <div className={`days-remaining ${getDaysRemainingClass(project.endDate)}`}>
-          {getDaysRemaining(project.endDate)}
+        <div className={`days-remaining ${getDaysRemainingClass(project.endDate, project.projectStage)}`}>
+          {getDaysRemaining(project.endDate, project.projectStage)}
         </div>
         
         <div className="project-photos">
