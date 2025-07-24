@@ -111,23 +111,35 @@ const Dashboard = () => {
   };
 
   const handleCompleteProject = (projectId) => {
-    const updatedProjects = projects.map(project => {
-      if (project.id === projectId) {
+    const project = projects.find(p => p.id === projectId);
+    const newStage = project.projectStage === 'Ολοκληρωμένο' ? 'Παράδοση' : 'Ολοκληρωμένο';
+    
+    const updatedProjects = projects.map(proj => {
+      if (proj.id === projectId) {
         return {
-          ...project,
-          projectStage: 'Ολοκληρωμένο',
+          ...proj,
+          projectStage: newStage,
           updatedAt: new Date()
         };
       }
-      return project;
+      return proj;
     });
     setProjects(updatedProjects);
     
-    // Ενημέρωση του selectedProject αν είναι αυτό που ολοκληρώθηκε
+    // Ενημέρωση του selectedProject αν είναι αυτό που αλλάζει
     if (selectedProject && selectedProject.id === projectId) {
-      setSelectedProject({
+      const updatedSelectedProject = {
         ...selectedProject,
-        projectStage: 'Ολοκληρωμένο'
+        projectStage: newStage
+      };
+      setSelectedProject(updatedSelectedProject);
+    }
+    
+    // Ενημέρωση του editingProject αν είναι αυτό που αλλάζει
+    if (editingProject && editingProject.id === projectId) {
+      setEditingProject({
+        ...editingProject,
+        projectStage: newStage
       });
     }
   };

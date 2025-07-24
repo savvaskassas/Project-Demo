@@ -39,7 +39,8 @@
 
 .edit-btn,
 .delete-btn,
-.complete-btn {
+.complete-btn,
+.reopen-btn {
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
@@ -59,6 +60,18 @@
   background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.reopen-btn {
+  background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.reopen-btn:hover {
+  background: linear-gradient(135deg, #138496 0%, #1ea080 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
 }
 
 .edit-btn {

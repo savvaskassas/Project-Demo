@@ -22,8 +22,7 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
     'Ανάπτυξη',
     'Δοκιμές',
     'Παράδοση',
-    'Συντήρηση',
-    'Ολοκληρωμένο'
+    'Συντήρηση'
   ];
 
   const handleInputChange = (e) => {

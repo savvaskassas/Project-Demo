@@ -88,7 +88,11 @@ const ProjectDetails = ({
           ← Πίσω στα Έργα
         </button>
         <div className="project-actions">
-          {project.projectStage !== 'Ολοκληρωμένο' && (
+          {project.projectStage === 'Ολοκληρωμένο' ? (
+            <button className="reopen-btn" onClick={onComplete}>
+              🔄 Επανάνοιγμα Έργου
+            </button>
+          ) : (
             <button className="complete-btn" onClick={onComplete}>
               ✅ Ολοκλήρωση Έργου
             </button>
