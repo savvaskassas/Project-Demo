@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import './ProjectItemForm.css';
 
-const ProjectItemForm = ({ onSubmit, onCancel, initialData = {}, isEditing = false }) => {
+const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = false }) => {
   const [formData, setFormData] = useState({
-    type: initialData.type || 'measurement',
-    title: initialData.title || '',
-    client: initialData.client || '',
-    date: initialData.date || '',
-    startEndDates: initialData.startEndDates || '',
-    stage: initialData.stage || '',
-    photos: initialData.photos || [],
-    measurements: initialData.measurements || { width: '', height: '', area: '' },
-    deliveryDetails: initialData.deliveryDetails || { quantity: '', type: '' },
-    notes: initialData.notes || ''
+    type: (initialData?.type) || 'measurement',
+    title: (initialData?.title) || '',
+    client: (initialData?.client) || '',
+    date: (initialData?.date) || '',
+    startEndDates: (initialData?.startEndDates) || '',
+    stage: (initialData?.stage) || '',
+    photos: (initialData?.photos) || [],
+    measurements: (initialData?.measurements) || { width: '', height: '', area: '' },
+    deliveryDetails: (initialData?.deliveryDetails) || { quantity: '', type: '' },
+    notes: (initialData?.notes) || ''
   });
 
   const [errors, setErrors] = useState({});
@@ -23,19 +23,8 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = {}, isEditing = fal
     { value: 'installation', label: '🔧 Εγκατάσταση' },
     { value: 'maintenance', label: '⚙️ Συντήρηση' },
     { value: 'photo', label: '📷 Φωτογραφία' },
-    { value: 'document', label: '📄 Έγγραφο' }
-  ];
-
-  const stages = [
-    'Προγραμματισμός',
-    'Μέτρηση',
-    'Παραγγελία',
-    'Παραγγελία - Παραγωγή',
-    'Παραγγελία - Τοποθέτηση',
-    'Παραγγελία - Ολοκλήρωση',
-    'Εγκατάσταση',
-    'Έλεγχος',
-    'Παράδοση'
+    { value: 'document', label: '📄 Έγγραφο' },
+    { value: 'invoice', label: '🧾 Παραστατικό' }
   ];
 
   const handleInputChange = (e) => {
@@ -109,20 +98,38 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = {}, isEditing = fal
   const validateForm = () => {
     const newErrors = {};
 
+    // Όλοι οι τύποι χρειάζονται τίτλο
     if (!formData.title.trim()) {
-      newErrors.title = 'Ο τίτλος είναι υποχρεωτικός';
+      newErrors.title = 'Η περιγραφή είναι υποχρεωτική';
     }
 
-    if (!formData.client.trim()) {
-      newErrors.client = 'Ο πελάτης είναι υποχρεωτικός';
-    }
-
+    // Όλοι οι τύποι χρειάζονται ημερομηνία
     if (!formData.date) {
       newErrors.date = 'Η ημερομηνία είναι υποχρεωτική';
     }
 
+    // Όλοι οι τύποι χρειάζονται στάδιο/κατάσταση
     if (!formData.stage) {
       newErrors.stage = 'Το στάδιο είναι υποχρεωτικό';
+    }
+
+    // Επιπλέον validations ανά τύπο
+    switch (formData.type) {
+      case 'delivery':
+      case 'maintenance':
+      case 'document':
+      case 'invoice':
+        if (!formData.client.trim()) {
+          newErrors.client = 'Αυτό το πεδίο είναι υποχρεωτικό';
+        }
+        break;
+      case 'installation':
+        if (!formData.client.trim()) {
+          newErrors.client = 'Η τοποθεσία είναι υποχρεωτική';
+        }
+        break;
+      default:
+        break;
     }
 
     setErrors(newErrors);
@@ -141,65 +148,612 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = {}, isEditing = fal
     switch (formData.type) {
       case 'measurement':
         return (
-          <div className="type-specific-fields">
-            <h3>📏 Στοιχεία Μέτρησης</h3>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Πλάτος</label>
-                <input
-                  type="text"
-                  value={formData.measurements.width}
-                  onChange={(e) => handleMeasurementChange('width', e.target.value)}
-                  placeholder="π.χ. 3.5m"
-                />
-              </div>
-              <div className="form-group">
-                <label>Ύψος</label>
-                <input
-                  type="text"
-                  value={formData.measurements.height}
-                  onChange={(e) => handleMeasurementChange('height', e.target.value)}
-                  placeholder="π.χ. 2.8m"
-                />
-              </div>
-              <div className="form-group">
-                <label>Εμβαδόν</label>
-                <input
-                  type="text"
-                  value={formData.measurements.area}
-                  onChange={(e) => handleMeasurementChange('area', e.target.value)}
-                  placeholder="π.χ. 9.8m²"
-                />
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Μέτρησης *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Μέτρηση Κεντρικής Εισόδου"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Μέτρησης *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Στοιχεία Μέτρησης */}
+            <div className="type-specific-fields">
+              <h3>📏 Διαστάσεις</h3>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Πλάτος</label>
+                  <input
+                    type="text"
+                    value={formData.measurements.width}
+                    onChange={(e) => handleMeasurementChange('width', e.target.value)}
+                    placeholder="π.χ. 3.5m"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Ύψος</label>
+                  <input
+                    type="text"
+                    value={formData.measurements.height}
+                    onChange={(e) => handleMeasurementChange('height', e.target.value)}
+                    placeholder="π.χ. 2.8m"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Εμβαδόν</label>
+                  <input
+                    type="text"
+                    value={formData.measurements.area}
+                    onChange={(e) => handleMeasurementChange('area', e.target.value)}
+                    placeholder="π.χ. 9.8m²"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Σημειώσεις</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Προσθέστε παρατηρήσεις για τη μέτρηση..."
+              />
+            </div>
+          </>
         );
       
       case 'delivery':
         return (
-          <div className="type-specific-fields">
-            <h3>📦 Στοιχεία Παραγγελίας</h3>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Ποσότητα</label>
-                <input
-                  type="text"
-                  value={formData.deliveryDetails.quantity}
-                  onChange={(e) => handleDeliveryChange('quantity', e.target.value)}
-                  placeholder="π.χ. 15 τεμάχια"
-                />
-              </div>
-              <div className="form-group">
-                <label>Τύπος/Περιγραφή</label>
-                <input
-                  type="text"
-                  value={formData.deliveryDetails.type}
-                  onChange={(e) => handleDeliveryChange('type', e.target.value)}
-                  placeholder="π.χ. Διπλό Τζάμι 6mm"
-                />
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Παραγγελίας *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Παραγγελία Τζαμιών Εισόδου"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Πελάτης */}
+            <div className="form-group">
+              <label>Προμηθευτής *</label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleInputChange}
+                className={errors.client ? 'error' : ''}
+                placeholder="π.χ. Glass Solutions SA"
+              />
+              {errors.client && <span className="error-message">{errors.client}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Παραγγελίας *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Στάδιο Παραγγελίας */}
+            <div className="form-group">
+              <label>Στάδιο Παραγγελίας *</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+                className={errors.stage ? 'error' : ''}
+              >
+                <option value="">Επιλέξτε στάδιο</option>
+                <option value="Παραγγελία">Παραγγελία</option>
+                <option value="Παραγγελία - Παραγωγή">Παραγγελία - Παραγωγή</option>
+                <option value="Παραγγελία - Τοποθέτηση">Παραγγελία - Τοποθέτηση</option>
+                <option value="Παραγγελία - Ολοκλήρωση">Παραγγελία - Ολοκλήρωση</option>
+              </select>
+              {errors.stage && <span className="error-message">{errors.stage}</span>}
+            </div>
+
+            {/* Στοιχεία Παραγγελίας */}
+            <div className="type-specific-fields">
+              <h3>📦 Λεπτομέρειες Παραγγελίας</h3>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Ποσότητα</label>
+                  <input
+                    type="text"
+                    value={formData.deliveryDetails.quantity}
+                    onChange={(e) => handleDeliveryChange('quantity', e.target.value)}
+                    placeholder="π.χ. 15 τεμάχια"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Τύπος/Περιγραφή</label>
+                  <input
+                    type="text"
+                    value={formData.deliveryDetails.type}
+                    onChange={(e) => handleDeliveryChange('type', e.target.value)}
+                    placeholder="π.χ. Διπλό Τζάμι 6mm"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Ημερομηνίες Παράδοσης */}
+            <div className="form-group">
+              <label>Ημερομηνίες Παράδοσης</label>
+              <input
+                type="text"
+                name="startEndDates"
+                value={formData.startEndDates}
+                onChange={handleInputChange}
+                placeholder="π.χ. 2024-01-20 - 2024-01-25"
+              />
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Σημειώσεις</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Προσθέστε παρατηρήσεις για την παραγγελία..."
+              />
+            </div>
+          </>
+        );
+
+      case 'installation':
+        return (
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Εγκατάστασης *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Εγκατάσταση Κεντρικής Εισόδου"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Πελάτης */}
+            <div className="form-group">
+              <label>Τοποθεσία *</label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleInputChange}
+                className={errors.client ? 'error' : ''}
+                placeholder="π.χ. Δήμος Ρόδου - Κεντρική Εγκ."
+              />
+              {errors.client && <span className="error-message">{errors.client}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Εγκατάστασης *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Στάδιο */}
+            <div className="form-group">
+              <label>Στάδιο Εγκατάστασης *</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+                className={errors.stage ? 'error' : ''}
+              >
+                <option value="">Επιλέξτε στάδιο</option>
+                <option value="Προγραμματισμός">Προγραμματισμός</option>
+                <option value="Εγκατάσταση">Εγκατάσταση</option>
+                <option value="Έλεγχος">Έλεγχος</option>
+                <option value="Παράδοση">Παράδοση</option>
+              </select>
+              {errors.stage && <span className="error-message">{errors.stage}</span>}
+            </div>
+
+            {/* Χρονικό Διάστημα */}
+            <div className="form-group">
+              <label>Διάρκεια Εργασιών</label>
+              <input
+                type="text"
+                name="startEndDates"
+                value={formData.startEndDates}
+                onChange={handleInputChange}
+                placeholder="π.χ. 2024-01-20 09:00 - 17:00"
+              />
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Σημειώσεις</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Προσθέστε παρατηρήσεις για την εγκατάσταση..."
+              />
+            </div>
+          </>
+        );
+
+      case 'maintenance':
+        return (
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Συντήρησης *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Συντήρηση Μηχανισμών Εισόδου"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Πελάτης */}
+            <div className="form-group">
+              <label>Πελάτης *</label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleInputChange}
+                className={errors.client ? 'error' : ''}
+                placeholder="π.χ. Δήμος Ρόδου"
+              />
+              {errors.client && <span className="error-message">{errors.client}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Συντήρησης *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Στάδιο */}
+            <div className="form-group">
+              <label>Κατάσταση *</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+                className={errors.stage ? 'error' : ''}
+              >
+                <option value="">Επιλέξτε κατάσταση</option>
+                <option value="Προγραμματισμός">Προγραμματισμός</option>
+                <option value="Συντήρηση">Συντήρηση</option>
+                <option value="Έλεγχος">Έλεγχος</option>
+                <option value="Ολοκλήρωση">Ολοκλήρωση</option>
+              </select>
+              {errors.stage && <span className="error-message">{errors.stage}</span>}
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Εργασίες/Σημειώσεις</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="4"
+                placeholder="Περιγράψτε τις εργασίες συντήρησης που έγιναν..."
+              />
+            </div>
+          </>
+        );
+
+      case 'photo':
+        return (
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Φωτογραφιών *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Φωτογραφίες Πριν την Εγκατάσταση"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Λήψης *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Στάδιο */}
+            <div className="form-group">
+              <label>Στάδιο Έργου *</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+                className={errors.stage ? 'error' : ''}
+              >
+                <option value="">Επιλέξτε στάδιο</option>
+                <option value="Μέτρηση">Μέτρηση</option>
+                <option value="Πριν την Εγκατάσταση">Πριν την Εγκατάσταση</option>
+                <option value="Κατά την Εγκατάσταση">Κατά την Εγκατάσταση</option>
+                <option value="Μετά την Εγκατάσταση">Μετά την Εγκατάσταση</option>
+                <option value="Παράδοση">Παράδοση</option>
+              </select>
+              {errors.stage && <span className="error-message">{errors.stage}</span>}
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Σημειώσεις</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Προσθέστε περιγραφή για τις φωτογραφίες..."
+              />
+            </div>
+          </>
+        );
+
+      case 'document':
+        return (
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Εγγράφου *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Συμβόλαιο Έργου - Υπογραφή"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Πελάτης */}
+            <div className="form-group">
+              <label>Πελάτης/Φορέας *</label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleInputChange}
+                className={errors.client ? 'error' : ''}
+                placeholder="π.χ. Δήμος Ρόδου"
+              />
+              {errors.client && <span className="error-message">{errors.client}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Εγγράφου *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Στάδιο */}
+            <div className="form-group">
+              <label>Κατάσταση Εγγράφου *</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+                className={errors.stage ? 'error' : ''}
+              >
+                <option value="">Επιλέξτε κατάσταση</option>
+                <option value="Προσχέδιο">Προσχέδιο</option>
+                <option value="Υπό Αναθεώρηση">Υπό Αναθεώρηση</option>
+                <option value="Έτοιμο">Έτοιμο</option>
+                <option value="Υπογραμμένο">Υπογραμμένο</option>
+                <option value="Αρχειοθετημένο">Αρχειοθετημένο</option>
+              </select>
+              {errors.stage && <span className="error-message">{errors.stage}</span>}
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Περιγραφή/Σημειώσεις</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Προσθέστε λεπτομέρειες για το έγγραφο..."
+              />
+            </div>
+          </>
+        );
+
+      case 'invoice':
+        return (
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή Παραστατικού *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Τιμολόγιο #001234 - Εγκατάσταση Τζαμιών"
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Πελάτης */}
+            <div className="form-group">
+              <label>Πελάτης *</label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleInputChange}
+                className={errors.client ? 'error' : ''}
+                placeholder="π.χ. Δήμος Ρόδου"
+              />
+              {errors.client && <span className="error-message">{errors.client}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία Έκδοσης *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Τύπος Παραστατικού */}
+            <div className="form-group">
+              <label>Τύπος Παραστατικού *</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+                className={errors.stage ? 'error' : ''}
+              >
+                <option value="">Επιλέξτε τύπο</option>
+                <option value="Προσφορά">Προσφορά</option>
+                <option value="Παραγγελία">Παραγγελία</option>
+                <option value="Δελτίο Αποστολής">Δελτίο Αποστολής</option>
+                <option value="Τιμολόγιο">Τιμολόγιο</option>
+                <option value="Απόδειξη">Απόδειξη</option>
+                <option value="Πιστωτικό">Πιστωτικό</option>
+              </select>
+              {errors.stage && <span className="error-message">{errors.stage}</span>}
+            </div>
+
+            {/* Στοιχεία Παραστατικού */}
+            <div className="type-specific-fields">
+              <h3>🧾 Στοιχεία Παραστατικού</h3>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Αριθμός Παραστατικού</label>
+                  <input
+                    type="text"
+                    value={formData.deliveryDetails.quantity}
+                    onChange={(e) => handleDeliveryChange('quantity', e.target.value)}
+                    placeholder="π.χ. #001234"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Συνολικό Ποσό (€)</label>
+                  <input
+                    type="text"
+                    value={formData.deliveryDetails.type}
+                    onChange={(e) => handleDeliveryChange('type', e.target.value)}
+                    placeholder="π.χ. 1,500.00"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Ημερομηνία Πληρωμής */}
+            <div className="form-group">
+              <label>Ημερομηνία Πληρωμής</label>
+              <input
+                type="text"
+                name="startEndDates"
+                value={formData.startEndDates}
+                onChange={handleInputChange}
+                placeholder="π.χ. 2024-02-15 (αν έχει πληρωθεί)"
+              />
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Σημειώσεις/Λεπτομέρειες</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Προσθέστε λεπτομέρειες για το παραστατικό (π.χ. περιγραφή εργασιών, όροι πληρωμής)..."
+              />
+            </div>
+          </>
         );
       
       default:
@@ -230,95 +784,10 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = {}, isEditing = fal
           {errors.type && <span className="error-message">{errors.type}</span>}
         </div>
 
-        {/* Τίτλος */}
-        <div className="form-group">
-          <label>Τίτλος *</label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-            className={errors.title ? 'error' : ''}
-            placeholder="π.χ. Μέτρηση Κεντρικής Εισόδου"
-          />
-          {errors.title && <span className="error-message">{errors.title}</span>}
-        </div>
-
-        {/* Πελάτης */}
-        <div className="form-group">
-          <label>Πελάτης *</label>
-          <input
-            type="text"
-            name="client"
-            value={formData.client}
-            onChange={handleInputChange}
-            className={errors.client ? 'error' : ''}
-            placeholder="π.χ. Δήμος Ρόδου"
-          />
-          {errors.client && <span className="error-message">{errors.client}</span>}
-        </div>
-
-        {/* Ημερομηνίες */}
-        <div className="form-row">
-          <div className="form-group">
-            <label>Ημερομηνία *</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleInputChange}
-              className={errors.date ? 'error' : ''}
-            />
-            {errors.date && <span className="error-message">{errors.date}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>Ημερομηνίες Έναρξης/Λήξης</label>
-            <input
-              type="text"
-              name="startEndDates"
-              value={formData.startEndDates}
-              onChange={handleInputChange}
-              placeholder="π.χ. 2024-01-20 - 2024-01-25"
-            />
-          </div>
-        </div>
-
-        {/* Στάδιο */}
-        <div className="form-group">
-          <label>Στάδιο *</label>
-          <select
-            name="stage"
-            value={formData.stage}
-            onChange={handleInputChange}
-            className={errors.stage ? 'error' : ''}
-          >
-            <option value="">Επιλέξτε στάδιο</option>
-            {stages.map((stage, index) => (
-              <option key={index} value={stage}>
-                {stage}
-              </option>
-            ))}
-          </select>
-          {errors.stage && <span className="error-message">{errors.stage}</span>}
-        </div>
-
         {/* Type-specific fields */}
         {renderTypeSpecificFields()}
 
-        {/* Σημειώσεις */}
-        <div className="form-group">
-          <label>Σημειώσεις</label>
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleInputChange}
-            rows="4"
-            placeholder="Προσθέστε τυχόν σημειώσεις ή παρατηρήσεις..."
-          />
-        </div>
-
-        {/* Upload Φωτογραφιών */}
+        {/* Upload Φωτογραφιών - Εμφανίζεται σε όλους τους τύπους */}
         <div className="form-group">
           <label>Φωτογραφίες</label>
           <input

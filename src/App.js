@@ -98,21 +98,7 @@ function AppContent() {
           />
         );
       default:
-        return (
-          <Dashboard
-            projects={projects}
-            onNewProject={() => setCurrentView('new-project')}
-            onViewProject={(project) => {
-              setSelectedProject(project);
-              setCurrentView('project-details');
-            }}
-            onEditProject={(project) => {
-              setEditingProject(project);
-              setCurrentView('edit-project');
-            }}
-            onDeleteProject={deleteProject}
-          />
-        );
+        return <Dashboard />;
     }
   };
 
