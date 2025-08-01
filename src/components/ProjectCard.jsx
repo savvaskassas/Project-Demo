@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './ProjectCard.css';
 import './PhotoSlider.css';
 
-const ProjectCard = ({ project, onClick }) => {
+const ProjectCard = ({ project, onClick, isCompact = false }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   const getStageColor = (stage) => {
@@ -84,7 +84,7 @@ const ProjectCard = ({ project, onClick }) => {
   };
 
   return (
-    <div className={`project-card ${project.photos && project.photos.length > 0 ? 'has-photos' : ''}`} onClick={onClick}>
+    <div className={`project-card ${project.photos && project.photos.length > 0 ? 'has-photos' : ''} ${isCompact ? 'compact' : ''}`} onClick={onClick}>
       {/* Photo Slider Section */}
       {project.photos && project.photos.length > 0 && (
         <div className="photo-slider-container">

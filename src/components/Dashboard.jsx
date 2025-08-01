@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [editingProject, setEditingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
+  const [isCompactView, setIsCompactView] = useState(false);
 
   // Mock data για τα έργα
   useEffect(() => {
@@ -275,12 +276,30 @@ const Dashboard = () => {
           <div className="projects-grid">
             <div className="projects-header">
               <h2>Έργα ({filteredProjects.length})</h2>
-              <button 
-                className="create-project-btn"
-                onClick={() => setCurrentView('create')}
-              >
-                + Νέο Έργο
-              </button>
+              <div className="header-controls">
+                <div className="view-toggle">
+                  <button 
+                    className={`view-btn ${!isCompactView ? 'active' : ''}`}
+                    onClick={() => setIsCompactView(false)}
+                    title="Μεγάλες κάρτες"
+                  >
+                    ⊞
+                  </button>
+                  <button 
+                    className={`view-btn ${isCompactView ? 'active' : ''}`}
+                    onClick={() => setIsCompactView(true)}
+                    title="Μικρές κάρτες"
+                  >
+                    ⊟
+                  </button>
+                </div>
+                <button 
+                  className="create-project-btn"
+                  onClick={() => setCurrentView('create')}
+                >
+                  + Νέο Έργο
+                </button>
+              </div>
             </div>
             
             <div className="search-filters">
@@ -335,7 +354,7 @@ const Dashboard = () => {
                 </p>
               </div>
             ) : (
-              <div className="projects-list">
+              <div className={`projects-list ${isCompactView ? 'compact-view' : 'full-view'}`}>
                 {filteredProjects.map(project => (
                   <ProjectCard 
                     key={project.id}
@@ -344,6 +363,7 @@ const Dashboard = () => {
                       setSelectedProject(project);
                       setCurrentView('details');
                     }}
+                    isCompact={isCompactView}
                   />
                 ))}
               </div>
