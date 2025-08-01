@@ -1,11 +1,12 @@
 .company-header {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   color: white;
-  padding: 20px 0;
+  padding: 25px 0;
   border-bottom: 4px solid #ff7700;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .company-header::before {
@@ -15,14 +16,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(135, 206, 235, 0.1) 0%, transparent 50%);
+  background: linear-gradient(45deg, rgba(135, 206, 235, 0.08) 0%, transparent 60%, rgba(255, 119, 0, 0.05) 100%);
   pointer-events: none;
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -33,7 +34,12 @@
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 25px;
+  transition: transform 0.3s ease;
+}
+
+.logo-section:hover {
+  transform: translateY(-2px);
 }
 
 .logo-container {
@@ -41,8 +47,8 @@
 }
 
 .logo-circle {
-  width: 80px;
-  height: 80px;
+  width: 85px;
+  height: 85px;
   background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
   border: 3px solid #87ceeb;
   border-radius: 50%;
@@ -93,23 +99,26 @@
 }
 
 .company-name {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 800;
   margin: 0;
-  background: linear-gradient(45deg, #ff7700, #ffaa44);
+  background: linear-gradient(45deg, #ff7700, #ffaa44, #87ceeb);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 1px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 1.2px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .company-tagline {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #87ceeb;
-  margin: 5px 0 0 0;
-  font-weight: 300;
-  letter-spacing: 0.5px;
+  margin: 8px 0 0 0;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 .header-right {
@@ -120,51 +129,90 @@
 .user-info {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(135, 206, 235, 0.2);
+  transition: all 0.3s ease;
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(135, 206, 235, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .user-details {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 6px;
 }
 
 .user-name {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #ffffff;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .user-role {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #87ceeb;
-  font-weight: 400;
+  font-weight: 500;
+  background: rgba(135, 206, 235, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(135, 206, 235, 0.3);
 }
 
 .logout-btn {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.logout-btn:hover::before {
+  left: 100%;
 }
 
 .logout-btn:hover {
   background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.5);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
 }
 
 .system-title h2 {

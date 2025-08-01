@@ -3,67 +3,106 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   display: flex;
   flex-direction: column;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
 .dashboard-content {
   flex: 1;
   display: flex;
-  max-width: 1400px;
+  max-width: 1500px;
   margin: 0 auto;
   width: 100%;
-  padding: 20px;
-  gap: 20px;
+  padding: 30px;
+  gap: 30px;
 }
 
 .dashboard-nav {
-  width: 250px;
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 280px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   height: fit-content;
   position: sticky;
-  top: 20px;
+  top: 30px;
+  border: 1px solid rgba(135, 206, 235, 0.1);
 }
 
 .nav-btn {
   width: 100%;
-  padding: 15px 20px;
+  padding: 18px 25px;
   background: transparent;
   border: 2px solid #e9ecef;
-  border-radius: 10px;
+  border-radius: 15px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: #1a1a1a;
-  transition: all 0.3s ease;
-  margin-bottom: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 12px;
   text-align: left;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(135, 206, 235, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.nav-btn:hover::before {
+  left: 100%;
 }
 
 .nav-btn:hover {
   border-color: #87ceeb;
-  background: rgba(135, 206, 235, 0.1);
-  transform: translateX(5px);
+  background: rgba(135, 206, 235, 0.08);
+  transform: translateX(8px);
+  box-shadow: 0 5px 15px rgba(135, 206, 235, 0.2);
 }
 
 .nav-btn.active {
   background: linear-gradient(135deg, #ff7700 0%, #ffaa44 100%);
   color: white;
   border-color: #ff7700;
-  box-shadow: 0 4px 15px rgba(255, 119, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 119, 0, 0.4);
+  transform: translateX(5px);
+}
+
+.nav-btn.active::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
 .dashboard-main {
   flex: 1;
-  background: white;
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+  border-radius: 25px;
+  padding: 40px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
   min-height: 80vh;
+  border: 1px solid rgba(135, 206, 235, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff7700 0%, #ffaa44 50%, #87ceeb 100%);
+  border-radius: 25px 25px 0 0;
 }
 
 .projects-grid {
@@ -74,71 +113,126 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f1f3f4;
+  margin-bottom: 35px;
+  padding-bottom: 25px;
+  border-bottom: 3px solid #f1f3f4;
+  position: relative;
+}
+
+.projects-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ff7700, #ffaa44);
+  border-radius: 2px;
 }
 
 .projects-header h2 {
   color: #1a1a1a;
-  font-size: 1.8rem;
-  font-weight: 600;
+  font-size: 2.2rem;
+  font-weight: 700;
   margin: 0;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .create-project-btn {
   background: linear-gradient(135deg, #ff7700 0%, #ffaa44 100%);
   color: white;
   border: none;
-  padding: 12px 25px;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 15px 30px;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 119, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 25px rgba(255, 119, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.create-project-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.create-project-btn:hover::before {
+  left: 100%;
 }
 
 .create-project-btn:hover {
   background: linear-gradient(135deg, #e66a00 0%, #ff9933 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 119, 0, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255, 119, 0, 0.5);
+}
+
+.create-project-btn:active {
+  transform: translateY(-1px);
 }
 
 /* Search and Filter Styles */
 .search-filters {
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 25px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border: 2px solid #e9ecef;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(135, 206, 235, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-filters::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff7700 0%, #ffaa44 50%, #87ceeb 100%);
+  border-radius: 20px 20px 0 0;
 }
 
 .search-bar {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .search-input {
   width: 100%;
-  padding: 15px 20px;
+  padding: 18px 25px;
   border: 2px solid #e9ecef;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: #f8f9fa;
+  font-weight: 500;
 }
 
 .search-input:focus {
   outline: none;
   border-color: #87ceeb;
   background: white;
-  box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+  box-shadow: 0 0 0 4px rgba(135, 206, 235, 0.15);
+  transform: translateY(-2px);
 }
 
 .date-filters {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   align-items: end;
   flex-wrap: wrap;
 }
