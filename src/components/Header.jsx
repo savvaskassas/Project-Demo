@@ -24,7 +24,7 @@ const Header = ({ user, onLogout }) => {
             <div className="user-info">
               <div className="user-details">
                 <span className="user-name">👤 {user.name}</span>
-                <span className="user-role">{user.role === 'admin' ? 'Διαχειριστής' : 'Χρήστης'}</span>
+                <span className="user-role">{user.role === 'admin' ? 'Διαχειριστής Συστήματος' : 'Χρήστης'}</span>
               </div>
               <button className="logout-btn" onClick={onLogout}>
                 🚪 Αποσύνδεση

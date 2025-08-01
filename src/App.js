@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Header from './components/Header';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ProjectForm from './components/ProjectForm';
@@ -104,7 +103,6 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Header />
       <main className="main-content">
         {renderCurrentView()}
       </main>

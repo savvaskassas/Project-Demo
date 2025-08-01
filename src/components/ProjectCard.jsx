@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ProjectCard.css';
+import './PhotoSlider.css';
 
 const ProjectCard = ({ project, onClick }) => {
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
   const getStageColor = (stage) => {
     const colors = {
       'Προγραμματισμός': '#6c757d',
@@ -17,7 +20,31 @@ const ProjectCard = ({ project, onClick }) => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('el-GR');
+    const date = new Date(dateString);
+    return date.toLocaleDateString('el-GR');
+  };
+
+  const nextPhoto = (e) => {
+    e.stopPropagation();
+    if (project.photos && project.photos.length > 0) {
+      setCurrentPhotoIndex((prev) => 
+        prev === project.photos.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevPhoto = (e) => {
+    e.stopPropagation();
+    if (project.photos && project.photos.length > 0) {
+      setCurrentPhotoIndex((prev) => 
+        prev === 0 ? project.photos.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const goToPhoto = (e, index) => {
+    e.stopPropagation();
+    setCurrentPhotoIndex(index);
   };
 
   const getDaysRemaining = (endDate, projectStage) => {
@@ -57,7 +84,50 @@ const ProjectCard = ({ project, onClick }) => {
   };
 
   return (
-    <div className="project-card" onClick={onClick}>
+    <div className={`project-card ${project.photos && project.photos.length > 0 ? 'has-photos' : ''}`} onClick={onClick}>
+      {/* Photo Slider Section */}
+      {project.photos && project.photos.length > 0 && (
+        <div className="photo-slider-container">
+          <div className="photo-slider">
+            <img 
+              src={project.photos[currentPhotoIndex]} 
+              alt={`Φωτογραφία ${currentPhotoIndex + 1}`}
+              className="slider-image"
+            />
+            
+            {project.photos.length > 1 && (
+              <>
+                <button 
+                  className="slider-nav prev" 
+                  onClick={prevPhoto}
+                  aria-label="Προηγούμενη φωτογραφία"
+                >
+                  &#8249;
+                </button>
+                <button 
+                  className="slider-nav next" 
+                  onClick={nextPhoto}
+                  aria-label="Επόμενη φωτογραφία"
+                >
+                  &#8250;
+                </button>
+                
+                <div className="slider-dots">
+                  {project.photos.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`dot ${index === currentPhotoIndex ? 'active' : ''}`}
+                      onClick={(e) => goToPhoto(e, index)}
+                      aria-label={`Μετάβαση στη φωτογραφία ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="project-card-header">
         <h3 className="project-title">{project.projectTitle}</h3>
         <span 

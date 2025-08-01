@@ -12,6 +12,8 @@ const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
 
   // Mock data για τα έργα
   useEffect(() => {
@@ -24,7 +26,11 @@ const Dashboard = () => {
         endDate: '2024-03-30',
         assignedCollaborators: ['Ιωάννης Παπαδόπουλος', 'Μαρία Γεωργίου'],
         projectStage: 'Ανάπτυξη',
-        photos: [],
+        photos: [
+          'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop'
+        ],
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15'),
         items: [
@@ -60,7 +66,10 @@ const Dashboard = () => {
         endDate: '2024-04-15',
         assignedCollaborators: ['Δημήτρης Κωνσταντίνου'],
         projectStage: 'Σχεδιασμός',
-        photos: [],
+        photos: [
+          'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'
+        ],
         createdAt: new Date('2024-02-01'),
         updatedAt: new Date('2024-02-01'),
         items: []
@@ -73,7 +82,9 @@ const Dashboard = () => {
         endDate: '2024-05-30',
         assignedCollaborators: ['Ιωάννης Παπαδόπουλος', 'Μαρία Γεωργίου', 'Δημήτρης Κωνσταντίνου'],
         projectStage: 'Προγραμματισμός',
-        photos: [],
+        photos: [
+          'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop'
+        ],
         createdAt: new Date('2024-03-01'),
         updatedAt: new Date('2024-03-01'),
         items: []
@@ -81,6 +92,23 @@ const Dashboard = () => {
     ];
     setProjects(mockProjects);
   }, []);
+
+  // Φιλτράρισμα έργων βάσει αναζήτησης και ημερομηνιών
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = searchTerm === '' || 
+      project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.projectStage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.assignedCollaborators.some(collaborator => 
+        collaborator.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+    const matchesDateFilter = 
+      (dateFilter.start === '' || new Date(project.startDate) >= new Date(dateFilter.start)) &&
+      (dateFilter.end === '' || new Date(project.endDate) <= new Date(dateFilter.end));
+
+    return matchesSearch && matchesDateFilter;
+  });
 
   const handleCreateProject = (projectData) => {
     const newProject = {
@@ -95,9 +123,17 @@ const Dashboard = () => {
   };
 
   const handleUpdateProject = (updatedProject) => {
-    setProjects(projects.map(p => 
+    console.log('Updating project:', updatedProject); // Debug log
+    const updatedProjects = projects.map(p => 
       p.id === updatedProject.id ? { ...updatedProject, updatedAt: new Date() } : p
-    ));
+    );
+    setProjects(updatedProjects);
+    
+    // Ενημέρωση του selectedProject αν είναι αυτό που επεξεργάστηκε
+    if (selectedProject && selectedProject.id === updatedProject.id) {
+      setSelectedProject({ ...updatedProject, updatedAt: new Date() });
+    }
+    
     setEditingProject(null);
     setCurrentView('projects');
   };
@@ -238,7 +274,7 @@ const Dashboard = () => {
         return (
           <div className="projects-grid">
             <div className="projects-header">
-              <h2>Έργα ({projects.length})</h2>
+              <h2>Έργα ({filteredProjects.length})</h2>
               <button 
                 className="create-project-btn"
                 onClick={() => setCurrentView('create')}
@@ -246,13 +282,61 @@ const Dashboard = () => {
                 + Νέο Έργο
               </button>
             </div>
-            {projects.length === 0 ? (
+            
+            <div className="search-filters">
+              <div className="search-bar">
+                <input
+                  type="text"
+                  placeholder="🔍 Αναζήτηση έργων (τίτλος, πελάτης, στάδιο, συνεργάτες)..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              
+              <div className="date-filters">
+                <div className="date-filter-group">
+                  <label>Από:</label>
+                  <input
+                    type="date"
+                    value={dateFilter.start}
+                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
+                    className="date-input"
+                  />
+                </div>
+                <div className="date-filter-group">
+                  <label>Έως:</label>
+                  <input
+                    type="date"
+                    value={dateFilter.end}
+                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
+                    className="date-input"
+                  />
+                </div>
+                <button 
+                  className="clear-filters-btn"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setDateFilter({ start: '', end: '' });
+                  }}
+                >
+                  🗑️ Καθαρισμός
+                </button>
+              </div>
+            </div>
+
+            {filteredProjects.length === 0 ? (
               <div className="no-projects">
-                <p>Δεν υπάρχουν έργα. Δημιουργήστε το πρώτο σας έργο!</p>
+                <p>
+                  {searchTerm || dateFilter.start || dateFilter.end 
+                    ? 'Δεν βρέθηκαν έργα που να ταιριάζουν με τα κριτήρια αναζήτησης.' 
+                    : 'Δεν υπάρχουν έργα. Δημιουργήστε το πρώτο σας έργο!'
+                  }
+                </p>
               </div>
             ) : (
               <div className="projects-list">
-                {projects.map(project => (
+                {filteredProjects.map(project => (
                   <ProjectCard 
                     key={project.id}
                     project={project}

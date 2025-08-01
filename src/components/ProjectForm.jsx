@@ -130,7 +130,13 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      onSubmit(formData);
+      // Περνάμε όλα τα δεδομένα του αρχικού έργου συν τις αλλαγές
+      const submitData = initialData.id ? { 
+        ...initialData, // Διατηρούμε όλα τα υπάρχοντα δεδομένα
+        ...formData,    // Εφαρμόζουμε τις αλλαγές
+        id: initialData.id 
+      } : formData;
+      onSubmit(submitData);
     }
   };
 
