@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ProjectItemForm from './ProjectItemForm';
 import ProjectItemCard from './ProjectItemCard';
+import ProjectNotes from './ProjectNotes';
 import './ProjectDetails.css';
 
 const ProjectDetails = ({ 
@@ -9,6 +10,7 @@ const ProjectDetails = ({
   onEdit, 
   onDelete, 
   onComplete,
+  onUpdateProject,
   onAddItem, 
   onUpdateItem, 
   onDeleteItem 
@@ -195,6 +197,12 @@ const ProjectDetails = ({
           </div>
         )}
       </div>
+
+      {/* Project Notes */}
+      <ProjectNotes 
+        project={project}
+        onUpdateProject={onUpdateProject}
+      />
     </div>
   );
 };

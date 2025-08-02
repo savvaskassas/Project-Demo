@@ -266,6 +266,12 @@ const Dashboard = () => {
             }}
             onDelete={() => handleDeleteProject(selectedProject.id)}
             onComplete={() => handleCompleteProject(selectedProject.id)}
+            onUpdateProject={(updatedProject) => {
+              setProjects(projects.map(p => 
+                p.id === updatedProject.id ? updatedProject : p
+              ));
+              setSelectedProject(updatedProject);
+            }}
             onAddItem={(itemData) => handleAddItemToProject(selectedProject.id, itemData)}
             onUpdateItem={(itemId, updatedItem) => handleUpdateItem(selectedProject.id, itemId, updatedItem)}
             onDeleteItem={(itemId) => handleDeleteItem(selectedProject.id, itemId)}
