@@ -279,16 +279,16 @@ const Dashboard = () => {
               <div className="header-controls">
                 <div className="view-toggle">
                   <button 
-                    className={`view-btn ${!isCompactView ? 'active' : ''}`}
-                    onClick={() => setIsCompactView(false)}
-                    title="Μεγάλες κάρτες"
+                    className={`view-btn ${isCompactView ? 'active' : ''}`}
+                    onClick={() => setIsCompactView(true)}
+                    title="Μικρές κάρτες"
                   >
                     ⊞
                   </button>
                   <button 
-                    className={`view-btn ${isCompactView ? 'active' : ''}`}
-                    onClick={() => setIsCompactView(true)}
-                    title="Μικρές κάρτες"
+                    className={`view-btn ${!isCompactView ? 'active' : ''}`}
+                    onClick={() => setIsCompactView(false)}
+                    title="Μεγάλες κάρτες"
                   >
                     ⊟
                   </button>
