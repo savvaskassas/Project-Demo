@@ -6,6 +6,7 @@ import './ProjectDetails.css';
 
 const ProjectDetails = ({ 
   project, 
+  selectedNoteDate,
   onBack, 
   onEdit, 
   onDelete, 
@@ -13,7 +14,8 @@ const ProjectDetails = ({
   onUpdateProject,
   onAddItem, 
   onUpdateItem, 
-  onDeleteItem 
+  onDeleteItem,
+  onClearSelectedNoteDate
 }) => {
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -201,7 +203,9 @@ const ProjectDetails = ({
       {/* Project Notes */}
       <ProjectNotes 
         project={project}
+        selectedNoteDate={selectedNoteDate}
         onUpdateProject={onUpdateProject}
+        onClearSelectedNoteDate={onClearSelectedNoteDate}
       />
     </div>
   );

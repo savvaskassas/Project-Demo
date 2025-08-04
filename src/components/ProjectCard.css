@@ -176,6 +176,72 @@
   border-top: 2px solid #f1f3f4;
 }
 
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notes-chart-btn {
+  background: linear-gradient(135deg, #ff7700 0%, #ffaa44 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 8px rgba(255, 119, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.notes-chart-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.notes-chart-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 119, 0, 0.35);
+  background: linear-gradient(135deg, #ff9500 0%, #ffb944 100%);
+}
+
+.notes-chart-btn:hover::before {
+  left: 100%;
+}
+
+.notes-chart-btn:active {
+  transform: translateY(0) scale(1.02);
+}
+
+.notes-chart-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  pointer-events: all;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+}
+
+.notes-chart-container > * {
+  pointer-events: all;
+}
+
+.project-card.chart-open {
+  z-index: 100;
+  overflow: visible;
+}
+
 .days-remaining {
   font-size: 0.85rem;
   font-weight: 600;
@@ -254,6 +320,15 @@
     gap: 10px;
     align-items: flex-start;
   }
+  
+  .footer-right {
+    gap: 8px;
+  }
+  
+  .notes-chart-btn {
+    padding: 5px 6px;
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -269,5 +344,10 @@
     width: 32px;
     height: 32px;
     font-size: 0.7rem;
+  }
+  
+  .notes-chart-btn {
+    padding: 4px 5px;
+    font-size: 0.8rem;
   }
 }

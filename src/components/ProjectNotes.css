@@ -70,6 +70,35 @@
   box-shadow: 0 0 0 4px rgba(255, 119, 0, 0.15);
 }
 
+.date-input input.highlighted {
+  border-color: #ff7700;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+  box-shadow: 0 0 0 4px rgba(255, 119, 0, 0.15);
+  animation: pulseHighlight 2s ease-in-out;
+}
+
+@keyframes pulseHighlight {
+  0%, 100% { 
+    box-shadow: 0 0 0 4px rgba(255, 119, 0, 0.15);
+  }
+  50% { 
+    box-shadow: 0 0 0 8px rgba(255, 119, 0, 0.25);
+  }
+}
+
+.chart-selection-indicator {
+  font-size: 0.85rem;
+  color: #ff7700;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 119, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  max-width: fit-content;
+}
+
 .note-textarea {
   display: flex;
   flex-direction: column;
@@ -101,6 +130,90 @@
   outline: none;
   border-color: #ff7700;
   box-shadow: 0 0 0 4px rgba(255, 119, 0, 0.15);
+}
+
+.photo-upload-section {
+  margin-bottom: 20px;
+}
+
+.photo-upload-section label {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.photo-input {
+  display: none;
+}
+
+.photo-upload-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.photo-upload-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.note-photos-preview {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.note-photo-item {
+  position: relative;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.note-photo-thumbnail {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-note-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.remove-note-photo-btn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.1);
 }
 
 .note-actions {
@@ -137,6 +250,272 @@
   transform: none;
 }
 
+/* Edit Modal Styles */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.edit-modal {
+  background: white;
+  border-radius: 15px;
+  padding: 0;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.edit-modal-header {
+  background: linear-gradient(135deg, #ff7700 0%, #ffaa44 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px 15px 0 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.edit-modal-date {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.edit-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.edit-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.edit-modal-content {
+  padding: 25px;
+}
+
+.edit-modal-textarea {
+  margin-bottom: 25px;
+}
+
+.edit-modal-textarea label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.edit-modal-textarea textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.3s ease;
+  background: white;
+  color: #1a1a1a;
+  box-sizing: border-box;
+}
+
+.edit-modal-textarea textarea:focus {
+  outline: none;
+  border-color: #ff7700;
+  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.1);
+}
+
+.edit-modal-photos {
+  margin-bottom: 25px;
+}
+
+.edit-modal-photo-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.edit-modal-photo-upload-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.edit-modal-photos-preview {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.edit-modal-photo-item {
+  position: relative;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-modal-photo-thumbnail {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+.edit-modal-remove-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.edit-modal-remove-photo-btn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.1);
+}
+
+.edit-modal-actions {
+  background: #f8f9fa;
+  padding: 20px 25px;
+  border-radius: 0 0 15px 15px;
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.edit-modal-save-btn,
+.edit-modal-cancel-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-modal-save-btn {
+  background: linear-gradient(135deg, #ff7700 0%, #ffaa44 100%);
+  color: white;
+}
+
+.edit-modal-save-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e6690a 0%, #ff7700 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 119, 0, 0.3);
+}
+
+.edit-modal-save-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.edit-modal-cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.edit-modal-cancel-btn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 768px) {
+  .edit-modal {
+    width: 95%;
+    margin: 20px;
+    max-height: 85vh;
+  }
+  
+  .edit-modal-content {
+    padding: 20px;
+  }
+  
+  .edit-modal-actions {
+    padding: 15px 20px;
+    flex-direction: column;
+  }
+  
+  .edit-modal-save-btn,
+  .edit-modal-cancel-btn {
+    width: 100%;
+  }
+}
+
 .notes-list {
   margin-top: 30px;
 }
@@ -171,6 +550,32 @@
   border-color: #ff7700;
 }
 
+.note-card.highlighted-note {
+  border-color: #ff7700;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+  box-shadow: 0 4px 20px rgba(255, 119, 0, 0.25);
+  animation: highlightPulse 2s ease-in-out;
+  transform: scale(1.02);
+  transition: all 0.5s ease;
+}
+
+.note-card.fade-highlight {
+  border-color: #e9ecef;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1);
+  animation: none;
+}
+
+@keyframes highlightPulse {
+  0%, 100% { 
+    box-shadow: 0 4px 20px rgba(255, 119, 0, 0.25);
+  }
+  50% { 
+    box-shadow: 0 6px 25px rgba(255, 119, 0, 0.4);
+  }
+}
+
 .note-header {
   display: flex;
   justify-content: space-between;
@@ -186,6 +591,13 @@
   font-size: 0.95rem;
 }
 
+.note-actions-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-note-btn,
 .delete-note-btn {
   background: none;
   border: none;
@@ -195,6 +607,12 @@
   border-radius: 6px;
   transition: all 0.3s ease;
   opacity: 0.7;
+}
+
+.edit-note-btn:hover {
+  background: rgba(255, 119, 0, 0.1);
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .delete-note-btn:hover {
@@ -207,8 +625,45 @@
   color: #1a1a1a;
   line-height: 1.6;
   font-size: 0.95rem;
+}
+
+.note-text {
   white-space: pre-wrap;
   word-wrap: break-word;
+  margin-bottom: 15px;
+}
+
+.note-photos-display {
+  margin-top: 15px;
+}
+
+.note-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.note-photo-display {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.note-photo-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #ff7700;
+}
+
+.note-photo-display img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
 }
 
 .no-notes {
@@ -270,6 +725,21 @@
     width: 100%;
     justify-content: center;
   }
+  
+  .note-photos-preview {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  
+  .note-photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  
+  .chart-selection-indicator {
+    font-size: 0.8rem;
+    padding: 3px 6px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -288,5 +758,18 @@
   .save-note-btn {
     padding: 10px 20px;
     font-size: 0.9rem;
+  }
+  
+  .note-photos-preview {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .note-photos-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .note-photo-thumbnail,
+  .note-photo-display img {
+    height: 80px;
   }
 }

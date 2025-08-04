@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import './ProjectCard.css';
 import './PhotoSlider.css';
+import NotesChart from './NotesChart';
 
 const ProjectCard = ({ project, onClick, isCompact = false }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [showNotesChart, setShowNotesChart] = useState(false);
 
   const getStageColor = (stage) => {
     const colors = {
@@ -84,7 +86,7 @@ const ProjectCard = ({ project, onClick, isCompact = false }) => {
   };
 
   return (
-    <div className={`project-card ${project.photos && project.photos.length > 0 ? 'has-photos' : ''} ${isCompact ? 'compact' : ''}`} onClick={onClick}>
+    <div className={`project-card ${project.photos && project.photos.length > 0 ? 'has-photos' : ''} ${isCompact ? 'compact' : ''} ${showNotesChart ? 'chart-open' : ''}`} onClick={() => onClick(project)}>
       {/* Photo Slider Section */}
       {project.photos && project.photos.length > 0 && (
         <div className="photo-slider-container">
@@ -188,14 +190,51 @@ const ProjectCard = ({ project, onClick, isCompact = false }) => {
           {getDaysRemaining(project.endDate, project.projectStage)}
         </div>
         
-        <div className="project-photos">
-          {project.photos && project.photos.length > 0 ? (
-            <span className="photos-count">📷 {project.photos.length}</span>
-          ) : (
-            <span className="no-photos">Χωρίς φωτογραφίες</span>
-          )}
+        <div className="footer-right">
+          <div className="project-photos">
+            {project.photos && project.photos.length > 0 ? (
+              <span className="photos-count">📷 {project.photos.length}</span>
+            ) : (
+              <span className="no-photos">Χωρίς φωτογραφίες</span>
+            )}
+          </div>
+          
+          <button 
+            className="notes-chart-btn"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowNotesChart(!showNotesChart);
+            }}
+            title="Προβολή διαγράμματος σημειώσεων"
+          >
+            📊
+          </button>
         </div>
       </div>
+      
+      {showNotesChart && (
+        <div 
+          className="notes-chart-container" 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (e.target === e.currentTarget) {
+              setShowNotesChart(false);
+            }
+          }}
+        >
+          <NotesChart 
+            project={project} 
+            onClose={() => setShowNotesChart(false)}
+            onNoteClick={(date) => {
+              setShowNotesChart(false);
+              // Navigate to project with specific note date
+              onClick(project, date);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

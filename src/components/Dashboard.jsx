@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [currentView, setCurrentView] = useState('projects');
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedNoteDate, setSelectedNoteDate] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
@@ -256,8 +257,10 @@ const Dashboard = () => {
         return selectedProject ? (
           <ProjectDetails 
             project={selectedProject}
+            selectedNoteDate={selectedNoteDate}
             onBack={() => {
               setSelectedProject(null);
+              setSelectedNoteDate(null);
               setCurrentView('projects');
             }}
             onEdit={() => {
@@ -275,6 +278,7 @@ const Dashboard = () => {
             onAddItem={(itemData) => handleAddItemToProject(selectedProject.id, itemData)}
             onUpdateItem={(itemId, updatedItem) => handleUpdateItem(selectedProject.id, itemId, updatedItem)}
             onDeleteItem={(itemId) => handleDeleteItem(selectedProject.id, itemId)}
+            onClearSelectedNoteDate={() => setSelectedNoteDate(null)}
           />
         ) : null;
       default:
@@ -365,8 +369,9 @@ const Dashboard = () => {
                   <ProjectCard 
                     key={project.id}
                     project={project}
-                    onClick={() => {
-                      setSelectedProject(project);
+                    onClick={(proj, noteDate) => {
+                      setSelectedProject(proj);
+                      setSelectedNoteDate(noteDate || null);
                       setCurrentView('details');
                     }}
                     isCompact={isCompactView}
