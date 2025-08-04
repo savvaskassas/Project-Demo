@@ -60,6 +60,41 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
     }
   }, [selectedNoteDate, notes]);
 
+  // Keyboard navigation for image viewer
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (!showImageViewer) return;
+      
+      switch(e.key) {
+        case 'Escape':
+          handleCloseImageViewer();
+          break;
+        case 'ArrowLeft':
+          if (viewerImageData.photos.length > 1) {
+            handlePreviousImage();
+          }
+          break;
+        case 'ArrowRight':
+          if (viewerImageData.photos.length > 1) {
+            handleNextImage();
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    if (showImageViewer) {
+      document.addEventListener('keydown', handleKeyPress);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showImageViewer, viewerImageData]);
+
   const handleDateChange = (e) => {
     const date = e.target.value;
     setSelectedDate(date);
