@@ -12,6 +12,13 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
     text: '',
     photos: []
   });
+  const [showImageViewer, setShowImageViewer] = useState(false);
+  const [viewerImageData, setViewerImageData] = useState({
+    url: '',
+    name: '',
+    index: 0,
+    photos: []
+  });
 
   // Handle selectedNoteDate from chart click
   useEffect(() => {
@@ -221,6 +228,48 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
     }));
   };
 
+  const handleOpenImageViewer = (photo, photos, index) => {
+    setViewerImageData({
+      url: photo.url,
+      name: photo.name,
+      index: index,
+      photos: photos
+    });
+    setShowImageViewer(true);
+  };
+
+  const handleCloseImageViewer = () => {
+    setShowImageViewer(false);
+    setViewerImageData({
+      url: '',
+      name: '',
+      index: 0,
+      photos: []
+    });
+  };
+
+  const handlePreviousImage = () => {
+    const newIndex = viewerImageData.index > 0 ? viewerImageData.index - 1 : viewerImageData.photos.length - 1;
+    const newPhoto = viewerImageData.photos[newIndex];
+    setViewerImageData(prev => ({
+      ...prev,
+      url: newPhoto.url,
+      name: newPhoto.name,
+      index: newIndex
+    }));
+  };
+
+  const handleNextImage = () => {
+    const newIndex = viewerImageData.index < viewerImageData.photos.length - 1 ? viewerImageData.index + 1 : 0;
+    const newPhoto = viewerImageData.photos[newIndex];
+    setViewerImageData(prev => ({
+      ...prev,
+      url: newPhoto.url,
+      name: newPhoto.name,
+      index: newIndex
+    }));
+  };
+
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     
@@ -303,9 +352,15 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
             
             {notePhotos.length > 0 && (
               <div className="note-photos-preview">
-                {notePhotos.map(photo => (
+                {notePhotos.map((photo, index) => (
                   <div key={photo.id} className="note-photo-item">
-                    <img src={photo.url} alt={photo.name} className="note-photo-thumbnail" />
+                    <img 
+                      src={photo.url} 
+                      alt={photo.name} 
+                      className="note-photo-thumbnail clickable-photo"
+                      onClick={() => handleOpenImageViewer(photo, notePhotos, index)}
+                      title="Κλικ για μεγέθυνση"
+                    />
                     <button
                       onClick={() => handleRemovePhoto(photo.id)}
                       className="remove-note-photo-btn"
@@ -385,9 +440,15 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
                       {notes[date].photos && notes[date].photos.length > 0 && (
                         <div className="note-photos-display">
                           <div className="note-photos-grid">
-                            {notes[date].photos.map(photo => (
+                            {notes[date].photos.map((photo, index) => (
                               <div key={photo.id} className="note-photo-display">
-                                <img src={photo.url} alt={photo.name} />
+                                <img 
+                                  src={photo.url} 
+                                  alt={photo.name}
+                                  onClick={() => handleOpenImageViewer(photo, notes[date].photos, index)}
+                                  className="clickable-photo"
+                                  title="Κλικ για μεγέθυνση"
+                                />
                               </div>
                             ))}
                           </div>
@@ -463,9 +524,15 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
                 
                 {editModalData.photos.length > 0 && (
                   <div className="edit-modal-photos-preview">
-                    {editModalData.photos.map(photo => (
+                    {editModalData.photos.map((photo, index) => (
                       <div key={photo.id} className="edit-modal-photo-item">
-                        <img src={photo.url} alt={photo.name} className="edit-modal-photo-thumbnail" />
+                        <img 
+                          src={photo.url} 
+                          alt={photo.name} 
+                          className="edit-modal-photo-thumbnail clickable-photo"
+                          onClick={() => handleOpenImageViewer(photo, editModalData.photos, index)}
+                          title="Κλικ για μεγέθυνση"
+                        />
                         <button
                           onClick={() => handleRemoveEditModalPhoto(photo.id)}
                           className="edit-modal-remove-photo-btn"
@@ -494,6 +561,56 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
               >
                 ❌ Ακύρωση
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Viewer Modal */}
+      {showImageViewer && (
+        <div className="image-viewer-overlay" onClick={handleCloseImageViewer}>
+          <div className="image-viewer-container" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={handleCloseImageViewer} 
+              className="image-viewer-close"
+              title="Κλείσιμο"
+            >
+              ✕
+            </button>
+            
+            {viewerImageData.photos.length > 1 && (
+              <>
+                <button 
+                  onClick={handlePreviousImage} 
+                  className="image-viewer-nav image-viewer-prev"
+                  title="Προηγούμενη φωτογραφία"
+                >
+                  ‹
+                </button>
+                <button 
+                  onClick={handleNextImage} 
+                  className="image-viewer-nav image-viewer-next"
+                  title="Επόμενη φωτογραφία"
+                >
+                  ›
+                </button>
+              </>
+            )}
+            
+            <div className="image-viewer-content">
+              <img 
+                src={viewerImageData.url} 
+                alt={viewerImageData.name}
+                className="image-viewer-image"
+              />
+              <div className="image-viewer-info">
+                <span className="image-viewer-name">{viewerImageData.name}</span>
+                {viewerImageData.photos.length > 1 && (
+                  <span className="image-viewer-counter">
+                    {viewerImageData.index + 1} / {viewerImageData.photos.length}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
