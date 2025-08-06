@@ -24,7 +24,8 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = f
     { value: 'maintenance', label: '⚙️ Συντήρηση' },
     { value: 'photo', label: '📷 Φωτογραφία' },
     { value: 'document', label: '📄 Έγγραφο' },
-    { value: 'invoice', label: '🧾 Παραστατικό' }
+    { value: 'invoice', label: '🧾 Παραστατικό' },
+    { value: 'other', label: '📋 Άλλο' }
   ];
 
   const handleInputChange = (e) => {
@@ -126,6 +127,11 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = f
       case 'installation':
         if (!formData.client.trim()) {
           newErrors.client = 'Η τοποθεσία είναι υποχρεωτική';
+        }
+        break;
+      case 'other':
+        if (!formData.client.trim()) {
+          newErrors.client = 'Αυτό το πεδίο είναι υποχρεωτικό';
         }
         break;
       default:
@@ -751,6 +757,93 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = f
                 onChange={handleInputChange}
                 rows="3"
                 placeholder="Προσθέστε λεπτομέρειες για το παραστατικό (π.χ. περιγραφή εργασιών, όροι πληρωμής)..."
+              />
+            </div>
+          </>
+        );
+
+      case 'other':
+        return (
+          <>
+            {/* Τίτλος */}
+            <div className="form-group">
+              <label>Περιγραφή/Τίτλος *</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className={errors.title ? 'error' : ''}
+                placeholder="π.χ. Συνάντηση με πελάτη, Δείγμα υλικού, Έλεγχος ποιότητας..."
+              />
+              {errors.title && <span className="error-message">{errors.title}</span>}
+            </div>
+
+            {/* Κατηγορία/Τύπος */}
+            <div className="form-group">
+              <label>Κατηγορία/Τύπος *</label>
+              <input
+                type="text"
+                name="client"
+                value={formData.client}
+                onChange={handleInputChange}
+                className={errors.client ? 'error' : ''}
+                placeholder="π.χ. Συνάντηση, Δείγμα, Έλεγχος, Έρευνα, Προσφορά..."
+              />
+              {errors.client && <span className="error-message">{errors.client}</span>}
+            </div>
+
+            {/* Ημερομηνία */}
+            <div className="form-group">
+              <label>Ημερομηνία *</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className={errors.date ? 'error' : ''}
+              />
+              {errors.date && <span className="error-message">{errors.date}</span>}
+            </div>
+
+            {/* Επιπλέον πληροφορίες */}
+            <div className="form-group">
+              <label>Επιπλέον πληροφορίες</label>
+              <input
+                type="text"
+                name="startEndDates"
+                value={formData.startEndDates}
+                onChange={handleInputChange}
+                placeholder="π.χ. Διάρκεια, Χρόνος, Κόστος, Παρευρισκόμενοι..."
+              />
+            </div>
+
+            {/* Στάδιο/Κατάσταση */}
+            <div className="form-group">
+              <label>Στάδιο/Κατάσταση</label>
+              <select
+                name="stage"
+                value={formData.stage}
+                onChange={handleInputChange}
+              >
+                <option value="">Επιλέξτε κατάσταση...</option>
+                <option value="Προγραμματισμένο">Προγραμματισμένο</option>
+                <option value="Σε εξέλιξη">Σε εξέλιξη</option>
+                <option value="Ολοκληρωμένο">Ολοκληρωμένο</option>
+                <option value="Αναμονή">Αναμονή</option>
+                <option value="Ακυρωμένο">Ακυρωμένο</option>
+              </select>
+            </div>
+
+            {/* Σημειώσεις */}
+            <div className="form-group">
+              <label>Αναλυτική Περιγραφή</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows="4"
+                placeholder="Προσθέστε αναλυτική περιγραφή, σκοπό, αποτελέσματα, σημειώσεις..."
               />
             </div>
           </>

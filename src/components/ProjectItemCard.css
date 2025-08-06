@@ -309,3 +309,34 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Specific styling for "other" type items */
+.project-item-card .item-type-label {
+  background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+}
+
+.project-item-card[data-type="other"] .item-type-label {
+  background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+}
+
+.project-item-card[data-type="other"]::before {
+  background: linear-gradient(90deg, #6c757d 0%, #868e96 100%);
+}
+
+.project-item-card[data-type="other"]:hover {
+  border-color: #6c757d;
+}
+
+.other-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.other-info span {
+  padding: 5px 8px;
+  background: rgba(108, 117, 125, 0.1);
+  border-radius: 5px;
+  font-size: 0.85rem;
+  border-left: 3px solid #6c757d;
+}

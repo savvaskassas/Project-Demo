@@ -9,7 +9,9 @@ const ProjectItemCard = ({ item, onEdit, onDelete }) => {
       'installation': '🔧',
       'maintenance': '⚙️',
       'photo': '📷',
-      'document': '📄'
+      'document': '📄',
+      'invoice': '🧾',
+      'other': '📋'
     };
     return icons[type] || '📋';
   };
@@ -21,7 +23,9 @@ const ProjectItemCard = ({ item, onEdit, onDelete }) => {
       'installation': 'Εγκατάσταση',
       'maintenance': 'Συντήρηση',
       'photo': 'Φωτογραφία',
-      'document': 'Έγγραφο'
+      'document': 'Έγγραφο',
+      'invoice': 'Παραστατικό',
+      'other': 'Άλλο'
     };
     return labels[type] || 'Στοιχείο';
   };
@@ -54,6 +58,18 @@ const ProjectItemCard = ({ item, onEdit, onDelete }) => {
             </div>
           </div>
         );
+
+      case 'other':
+        return (
+          <div className="type-info">
+            <h4>Πληροφορίες:</h4>
+            <div className="other-info">
+              <span><strong>Κατηγορία:</strong> {item.client}</span>
+              {item.startEndDates && <span><strong>Επιπλέον:</strong> {item.startEndDates}</span>}
+              {item.stage && <span><strong>Κατάσταση:</strong> {item.stage}</span>}
+            </div>
+          </div>
+        );
       
       default:
         return null;
@@ -61,7 +77,7 @@ const ProjectItemCard = ({ item, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="project-item-card">
+    <div className="project-item-card" data-type={item.type}>
       <div className="item-card-header">
         <div className="item-type">
           <span className="item-icon">{getItemTypeIcon(item.type)}</span>
@@ -82,7 +98,7 @@ const ProjectItemCard = ({ item, onEdit, onDelete }) => {
         
         <div className="item-details">
           <div className="detail-item">
-            <span className="detail-label">Πελάτης:</span>
+            <span className="detail-label">{item.type === 'other' ? 'Κατηγορία:' : 'Πελάτης:'}</span>
             <span className="detail-value">{item.client}</span>
           </div>
           
@@ -93,7 +109,7 @@ const ProjectItemCard = ({ item, onEdit, onDelete }) => {
           
           {item.startEndDates && (
             <div className="detail-item">
-              <span className="detail-label">Διάρκεια:</span>
+              <span className="detail-label">{item.type === 'other' ? 'Επιπλέον:' : 'Διάρκεια:'}</span>
               <span className="detail-value">{item.startEndDates}</span>
             </div>
           )}
