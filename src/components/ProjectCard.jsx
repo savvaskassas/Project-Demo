@@ -161,6 +161,15 @@ const ProjectCard = ({ project, onClick, isCompact = false }) => {
             </span>
           </div>
 
+          {project.location && project.location.address && (
+            <div className="info-item location-info">
+              <span className="info-label">📍 Τοποθεσία:</span>
+              <span className="info-value location-text">
+                {project.location.address}
+              </span>
+            </div>
+          )}
+
           {project.items && project.items.length > 0 && (
             <div className="info-item">
               <span className="info-label">Στοιχεία:</span>

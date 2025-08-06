@@ -20,24 +20,43 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
     photos: []
   });
 
+  // Image viewer functions
+  const handleCloseImageViewer = () => {
+    setShowImageViewer(false);
+    setViewerImageData({
+      url: '',
+      name: '',
+      index: 0,
+      photos: []
+    });
+  };
+
+  const handlePreviousImage = () => {
+    const newIndex = viewerImageData.index > 0 ? viewerImageData.index - 1 : viewerImageData.photos.length - 1;
+    const newPhoto = viewerImageData.photos[newIndex];
+    setViewerImageData(prev => ({
+      ...prev,
+      url: newPhoto.url,
+      name: newPhoto.name,
+      index: newIndex
+    }));
+  };
+
+  const handleNextImage = () => {
+    const newIndex = viewerImageData.index < viewerImageData.photos.length - 1 ? viewerImageData.index + 1 : 0;
+    const newPhoto = viewerImageData.photos[newIndex];
+    setViewerImageData(prev => ({
+      ...prev,
+      url: newPhoto.url,
+      name: newPhoto.name,
+      index: newIndex
+    }));
+  };
+
   // Handle selectedNoteDate from chart click
   useEffect(() => {
     if (selectedNoteDate) {
-      setSelectedDate(selectedNoteDate);
-      const existingNote = notes[selectedNoteDate];
-      
-      if (typeof existingNote === 'string') {
-        setNoteText(existingNote);
-        setNotePhotos([]);
-      } else if (existingNote) {
-        setNoteText(existingNote.text || '');
-        setNotePhotos(existingNote.photos || []);
-      } else {
-        setNoteText('');
-        setNotePhotos([]);
-      }
-      
-      // Scroll to specific note if it exists, otherwise scroll to notes section
+      // Only handle scrolling, don't affect the form
       setTimeout(() => {
         const specificNote = document.getElementById(`note-${selectedNoteDate}`);
         if (specificNote) {
@@ -93,7 +112,7 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
       document.removeEventListener('keydown', handleKeyPress);
       document.body.style.overflow = 'unset';
     };
-  }, [showImageViewer, viewerImageData]);
+  }, [showImageViewer, viewerImageData, handleCloseImageViewer, handlePreviousImage, handleNextImage]);
 
   const handleDateChange = (e) => {
     const date = e.target.value;
@@ -273,38 +292,6 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
     setShowImageViewer(true);
   };
 
-  const handleCloseImageViewer = () => {
-    setShowImageViewer(false);
-    setViewerImageData({
-      url: '',
-      name: '',
-      index: 0,
-      photos: []
-    });
-  };
-
-  const handlePreviousImage = () => {
-    const newIndex = viewerImageData.index > 0 ? viewerImageData.index - 1 : viewerImageData.photos.length - 1;
-    const newPhoto = viewerImageData.photos[newIndex];
-    setViewerImageData(prev => ({
-      ...prev,
-      url: newPhoto.url,
-      name: newPhoto.name,
-      index: newIndex
-    }));
-  };
-
-  const handleNextImage = () => {
-    const newIndex = viewerImageData.index < viewerImageData.photos.length - 1 ? viewerImageData.index + 1 : 0;
-    const newPhoto = viewerImageData.photos[newIndex];
-    setViewerImageData(prev => ({
-      ...prev,
-      url: newPhoto.url,
-      name: newPhoto.name,
-      index: newIndex
-    }));
-  };
-
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
     
@@ -351,13 +338,7 @@ const ProjectNotes = ({ project, selectedNoteDate, onUpdateProject, onClearSelec
                 type="date"
                 value={selectedDate}
                 onChange={handleDateChange}
-                className={selectedNoteDate ? 'highlighted' : ''}
               />
-              {selectedNoteDate && (
-                <span className="chart-selection-indicator">
-                  📊 Επιλέχθηκε από διάγραμμα
-                </span>
-              )}
             </div>
           </div>
           

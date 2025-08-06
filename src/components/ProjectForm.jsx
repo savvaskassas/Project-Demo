@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './ProjectForm.css';
+import LocationPicker from './LocationPicker';
 
 const ProjectForm = ({ onSubmit, initialData = {} }) => {
   const [formData, setFormData] = useState({
@@ -9,7 +10,13 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
     endDate: initialData.endDate || '',
     assignedCollaborators: initialData.assignedCollaborators || [],
     projectStage: initialData.projectStage || '',
-    photos: initialData.photos || []
+    photos: initialData.photos || [],
+    location: initialData.location || {
+      address: '',
+      lat: null,
+      lng: null,
+      placeId: null
+    }
   });
 
   const [collaboratorInput, setCollaboratorInput] = useState('');
@@ -55,6 +62,13 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
     setFormData(prev => ({
       ...prev,
       assignedCollaborators: prev.assignedCollaborators.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleLocationChange = (locationData) => {
+    setFormData(prev => ({
+      ...prev,
+      location: locationData
     }));
   };
 
@@ -181,6 +195,12 @@ const ProjectForm = ({ onSubmit, initialData = {} }) => {
           />
           {errors.client && <span className="error-message">{errors.client}</span>}
         </div>
+
+        {/* Τοποθεσία */}
+        <LocationPicker 
+          location={formData.location}
+          onLocationChange={handleLocationChange}
+        />
 
         {/* Ημερομηνίες */}
         <div className="form-row">
