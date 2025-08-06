@@ -77,7 +77,7 @@ const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
   };
 
   return (
-    <div className="project-item-card" data-type={item.type}>
+    <div className={`project-item-card ${isCompact ? 'compact' : ''}`} data-type={item.type}>
       <div className="item-card-header">
         <div className="item-type">
           <span className="item-icon">{getItemTypeIcon(item.type)}</span>

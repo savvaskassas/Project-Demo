@@ -25,6 +25,105 @@
   border-color: #28a745;
 }
 
+/* Compact View Styles */
+.project-item-card.compact {
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.project-item-card.compact .item-card-header {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.project-item-card.compact .item-icon {
+  font-size: 1.2rem;
+}
+
+.project-item-card.compact .item-type-label {
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  border-radius: 12px;
+}
+
+.project-item-card.compact .edit-item-btn,
+.project-item-card.compact .delete-item-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 0.8rem;
+}
+
+.project-item-card.compact .item-title {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.project-item-card.compact .detail-item {
+  margin-bottom: 8px;
+  padding: 6px 0;
+}
+
+.project-item-card.compact .detail-label,
+.project-item-card.compact .detail-value {
+  font-size: 0.8rem;
+}
+
+.project-item-card.compact .detail-value.stage {
+  padding: 3px 8px;
+  font-size: 0.7rem;
+}
+
+.project-item-card.compact .type-info {
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.project-item-card.compact .type-info h4 {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.project-item-card.compact .measurements-info span,
+.project-item-card.compact .delivery-info span,
+.project-item-card.compact .other-info span {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+.project-item-card.compact .item-notes {
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.project-item-card.compact .item-notes h4 {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.project-item-card.compact .item-notes p {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.project-item-card.compact .item-photos {
+  margin-top: 15px;
+  padding-top: 15px;
+}
+
+.project-item-card.compact .item-photos h4 {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.project-item-card.compact .photos-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.project-item-card.compact .photos-more {
+  font-size: 0.8rem;
+}
+
 .item-card-header {
   display: flex;
   justify-content: space-between;
