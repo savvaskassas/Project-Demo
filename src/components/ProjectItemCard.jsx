@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProjectItemCard.css';
 
-const ProjectItemCard = ({ item, onEdit, onDelete }) => {
+const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
   const getItemTypeIcon = (type) => {
     const icons = {
       'measurement': '📏',
