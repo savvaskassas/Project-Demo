@@ -239,6 +239,45 @@
   margin: 0;
 }
 
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-toggle-btn {
+  background: linear-gradient(135deg, #87ceeb 0%, #b3d9f2 100%);
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(135, 206, 235, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.view-toggle-btn:hover {
+  background: linear-gradient(135deg, #6bb6ff 0%, #87ceeb 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(135, 206, 235, 0.4);
+}
+
+.view-toggle-btn.compact {
+  background: linear-gradient(135deg, #ff7700 0%, #ffaa44 100%);
+  box-shadow: 0 2px 8px rgba(255, 119, 0, 0.3);
+}
+
+.view-toggle-btn.compact:hover {
+  background: linear-gradient(135deg, #e66a00 0%, #ff9933 100%);
+  box-shadow: 0 4px 12px rgba(255, 119, 0, 0.4);
+}
+
 .add-item-btn {
   background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
   color: white;
@@ -344,6 +383,10 @@
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+  }
+  
+  .section-actions {
+    justify-content: space-between;
   }
   
   .project-items-grid {
