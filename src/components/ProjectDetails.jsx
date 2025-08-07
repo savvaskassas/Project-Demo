@@ -19,7 +19,6 @@ const ProjectDetails = ({
 }) => {
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [isItemsCompact, setIsItemsCompact] = useState(false);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('el-GR', {
@@ -165,21 +164,12 @@ const ProjectDetails = ({
       <div className="project-items-section">
         <div className="section-header">
           <h2>📋 Στοιχεία Έργου ({project.items?.length || 0})</h2>
-          <div className="section-actions">
-            <button 
-              className={`view-toggle-btn ${isItemsCompact ? 'compact' : 'expanded'}`}
-              onClick={() => setIsItemsCompact(!isItemsCompact)}
-              title={isItemsCompact ? 'Μεγάλη προβολή' : 'Μικρή προβολή'}
-            >
-              {isItemsCompact ? '⬜' : '▣'}
-            </button>
-            <button 
-              className="add-item-btn"
-              onClick={() => setShowItemForm(true)}
-            >
-              + Προσθήκη Στοιχείου
-            </button>
-          </div>
+          <button 
+            className="add-item-btn"
+            onClick={() => setShowItemForm(true)}
+          >
+            + Προσθήκη Στοιχείου
+          </button>
         </div>
 
         {!project.items || project.items.length === 0 ? (
@@ -204,7 +194,6 @@ const ProjectDetails = ({
                 item={item}
                 onEdit={() => handleEditItem(item)}
                 onDelete={() => handleDeleteItem(item.id)}
-                isCompact={isItemsCompact}
               />
             ))}
           </div>
