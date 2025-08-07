@@ -17,7 +17,17 @@
   background: linear-gradient(135deg, #87ceeb 0%, #b3d9f2 100%);
   color: #1a1a1a;
   border: none;
-  padding: 12px 20px;
+    }
+}
+
+@media (max-width: 1024px) {
+  .project-items-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {ing: 12px 20px;
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
@@ -299,8 +309,14 @@
 
 .project-items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
+}
+
+/* Compact grid layout - smaller items fit better in 3 columns */
+.project-items-grid.compact {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
 }
 
 .no-items {
@@ -392,6 +408,13 @@
   .project-items-grid {
     grid-template-columns: 1fr;
     gap: 15px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .project-items-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
   }
 }
 
