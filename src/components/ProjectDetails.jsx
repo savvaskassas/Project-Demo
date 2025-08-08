@@ -188,13 +188,28 @@ const ProjectDetails = ({
 
       <div className="project-items-section">
         <div className="section-header">
-          <h2>📋 Στοιχεία Έργου ({project.items?.length || 0})</h2>
+          <h2>📋 Στοιχεία Έργου ({getFilteredItems().length})</h2>
           <button 
             className="add-item-btn"
             onClick={() => setShowItemForm(true)}
           >
             + Προσθήκη Στοιχείου
           </button>
+        </div>
+
+        {/* Category Filter Bar */}
+        <div className="category-filter-bar">
+          {categories.map(category => (
+            <button
+              key={category.value}
+              className={`category-filter-btn ${selectedCategory === category.value ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(category.value)}
+            >
+              <span className="category-icon">{category.icon}</span>
+              <span className="category-label">{category.label.replace(/^.+ /, '')}</span>
+              <span className="category-count">({getCategoryCount(category.value)})</span>
+            </button>
+          ))}
         </div>
 
         {!project.items || project.items.length === 0 ? (
@@ -211,9 +226,23 @@ const ProjectDetails = ({
               </button>
             </div>
           </div>
+        ) : getFilteredItems().length === 0 ? (
+          <div className="no-items">
+            <div className="no-items-content">
+              <span className="no-items-icon">🔍</span>
+              <h3>Δεν βρέθηκαν στοιχεία</h3>
+              <p>Δεν υπάρχουν στοιχεία για την επιλεγμένη κατηγορία</p>
+              <button 
+                className="add-first-item-btn"
+                onClick={() => setShowItemForm(true)}
+              >
+                Προσθήκη Στοιχείου
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="project-items-grid">
-            {project.items.map(item => (
+            {getFilteredItems().map(item => (
               <ProjectItemCard
                 key={item.id}
                 item={item}
