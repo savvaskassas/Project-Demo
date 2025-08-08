@@ -19,6 +19,19 @@ const ProjectDetails = ({
 }) => {
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const categories = [
+    { value: 'all', label: '📋 Όλα', icon: '📋' },
+    { value: 'measurement', label: '📏 Μέτρηση', icon: '📏' },
+    { value: 'delivery', label: '📦 Παραγγελία', icon: '📦' },
+    { value: 'installation', label: '🔧 Εγκατάσταση', icon: '🔧' },
+    { value: 'maintenance', label: '⚙️ Συντήρηση', icon: '⚙️' },
+    { value: 'photo', label: '📷 Φωτογραφία', icon: '📷' },
+    { value: 'document', label: '📄 Έγγραφο', icon: '📄' },
+    { value: 'invoice', label: '🧾 Παραστατικό', icon: '🧾' },
+    { value: 'other', label: '📋 Άλλο', icon: '📋' }
+  ];
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('el-GR', {
@@ -60,6 +73,18 @@ const ProjectDetails = ({
       'Ολοκληρωμένο': '#28a745'
     };
     return colors[stage] || '#6c757d';
+  };
+
+  const getFilteredItems = () => {
+    if (!project.items) return [];
+    if (selectedCategory === 'all') return project.items;
+    return project.items.filter(item => item.type === selectedCategory);
+  };
+
+  const getCategoryCount = (categoryValue) => {
+    if (!project.items) return 0;
+    if (categoryValue === 'all') return project.items.length;
+    return project.items.filter(item => item.type === categoryValue).length;
   };
 
   if (showItemForm) {
