@@ -20,17 +20,18 @@ const ProjectDetails = ({
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isFilterTransitioning, setIsFilterTransitioning] = useState(false);
 
   const categories = [
-    { value: 'all', label: '📋 Όλα', icon: '📋' },
-    { value: 'measurement', label: '📏 Μέτρηση', icon: '📏' },
-    { value: 'delivery', label: '📦 Παραγγελία', icon: '📦' },
-    { value: 'installation', label: '🔧 Εγκατάσταση', icon: '🔧' },
-    { value: 'maintenance', label: '⚙️ Συντήρηση', icon: '⚙️' },
-    { value: 'photo', label: '📷 Φωτογραφία', icon: '📷' },
-    { value: 'document', label: '📄 Έγγραφο', icon: '📄' },
-    { value: 'invoice', label: '🧾 Παραστατικό', icon: '🧾' },
-    { value: 'other', label: '📋 Άλλο', icon: '📋' }
+    { value: 'all', label: '📋 Όλα', icon: '📋', color: '#6c757d' },
+    { value: 'measurement', label: '📏 Μέτρηση', icon: '📏', color: '#17a2b8' },
+    { value: 'delivery', label: '📦 Παραγγελία', icon: '📦', color: '#28a745' },
+    { value: 'installation', label: '🔧 Εγκατάσταση', icon: '🔧', color: '#ffc107' },
+    { value: 'maintenance', label: '⚙️ Συντήρηση', icon: '⚙️', color: '#6f42c1' },
+    { value: 'photo', label: '📷 Φωτογραφία', icon: '📷', color: '#fd7e14' },
+    { value: 'document', label: '📄 Έγγραφο', icon: '📄', color: '#20c997' },
+    { value: 'invoice', label: '🧾 Παραστατικό', icon: '🧾', color: '#e83e8c' },
+    { value: 'other', label: '📋 Άλλο', icon: '📋', color: '#6c757d' }
   ];
 
   const formatDate = (dateString) => {
@@ -85,6 +86,23 @@ const ProjectDetails = ({
     if (!project.items) return 0;
     if (categoryValue === 'all') return project.items.length;
     return project.items.filter(item => item.type === categoryValue).length;
+  };
+
+  const handleKeyDown = (e, categoryValue) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCategoryChange(categoryValue);
+    }
+  };
+
+  const handleCategoryChange = (categoryValue) => {
+    if (categoryValue === selectedCategory) return;
+    
+    setIsFilterTransitioning(true);
+    setTimeout(() => {
+      setSelectedCategory(categoryValue);
+      setIsFilterTransitioning(false);
+    }, 150);
   };
 
   if (showItemForm) {
@@ -199,18 +217,49 @@ const ProjectDetails = ({
 
         {/* Category Filter Bar */}
         <div className="category-filter-bar">
-          {categories.map(category => (
-            <button
-              key={category.value}
-              className={`category-filter-btn ${selectedCategory === category.value ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category.value)}
-            >
-              <span className="category-icon">{category.icon}</span>
-              <span className="category-label">{category.label.replace(/^.+ /, '')}</span>
-              <span className="category-count">({getCategoryCount(category.value)})</span>
-            </button>
-          ))}
+          {categories.map((category, index) => {
+            const count = getCategoryCount(category.value);
+            const isActive = selectedCategory === category.value;
+            
+            return (
+              <button
+                key={category.value}
+                className={`category-filter-btn ${isActive ? 'active' : ''} ${count === 0 ? 'disabled' : ''}`}
+                onClick={() => handleCategoryChange(category.value)}
+                onKeyDown={(e) => handleKeyDown(e, category.value)}
+                disabled={count === 0 && category.value !== 'all'}
+                style={{
+                  animationDelay: `${index * 0.1}s`,
+                  '--category-color': category.color
+                }}
+                title={`${category.label} (${count} στοιχεία)`}
+                aria-label={`Φιλτράρισμα κατά ${category.label}, ${count} στοιχεία`}
+                aria-pressed={isActive}
+              >
+                <span className="category-icon">{category.icon}</span>
+                <span className="category-label">{category.label.replace(/^.+ /, '')}</span>
+                <span className="category-count">({count})</span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Filter Results Summary */}
+        {selectedCategory !== 'all' && (
+          <div className="filter-summary">
+            <span className="filter-info">
+              Εμφανίζονται {getFilteredItems().length} στοιχεία κατηγορίας "
+              {categories.find(cat => cat.value === selectedCategory)?.label.replace(/^.+ /, '')}"
+            </span>
+            <button 
+              className="clear-filter-btn"
+              onClick={() => setSelectedCategory('all')}
+              title="Εμφάνιση όλων των στοιχείων"
+            >
+              ✕ Καθαρισμός φίλτρου
+            </button>
+          </div>
+        )}
 
         {!project.items || project.items.length === 0 ? (
           <div className="no-items">
@@ -241,7 +290,7 @@ const ProjectDetails = ({
             </div>
           </div>
         ) : (
-          <div className="project-items-grid">
+          <div className={`project-items-grid ${isFilterTransitioning ? 'transitioning' : ''}`}>
             {getFilteredItems().map(item => (
               <ProjectItemCard
                 key={item.id}
