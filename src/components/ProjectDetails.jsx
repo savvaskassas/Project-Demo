@@ -216,23 +216,17 @@ const ProjectDetails = ({
         </div>
 
         {/* Category Filter Bar */}
-        <div className="category-filter-bar">
-          {categories.map((category, index) => {
+        <div className="category-filter-bar flat-bar">
+          {categories.map((category) => {
             const count = getCategoryCount(category.value);
             const isActive = selectedCategory === category.value;
-            
             return (
               <button
                 key={category.value}
-                className={`category-filter-btn ${isActive ? 'active' : ''} ${count === 0 ? 'disabled' : ''}`}
+                className={`category-filter-btn flat-btn${isActive ? ' active' : ''}`}
                 onClick={() => handleCategoryChange(category.value)}
                 onKeyDown={(e) => handleKeyDown(e, category.value)}
                 disabled={count === 0 && category.value !== 'all'}
-                style={{
-                  animationDelay: `${index * 0.1}s`,
-                  '--category-color': category.color
-                }}
-                title={`${category.label} (${count} στοιχεία)`}
                 aria-label={`Φιλτράρισμα κατά ${category.label}, ${count} στοιχεία`}
                 aria-pressed={isActive}
               >
@@ -243,23 +237,6 @@ const ProjectDetails = ({
             );
           })}
         </div>
-
-        {/* Filter Results Summary */}
-        {selectedCategory !== 'all' && (
-          <div className="filter-summary">
-            <span className="filter-info">
-              Εμφανίζονται {getFilteredItems().length} στοιχεία κατηγορίας "
-              {categories.find(cat => cat.value === selectedCategory)?.label.replace(/^.+ /, '')}"
-            </span>
-            <button 
-              className="clear-filter-btn"
-              onClick={() => setSelectedCategory('all')}
-              title="Εμφάνιση όλων των στοιχείων"
-            >
-              ✕ Καθαρισμός φίλτρου
-            </button>
-          </div>
-        )}
 
         {!project.items || project.items.length === 0 ? (
           <div className="no-items">
