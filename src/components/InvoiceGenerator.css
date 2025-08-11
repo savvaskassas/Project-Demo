@@ -27,6 +27,7 @@
 }
 
 .preview-btn,
+.pdf-btn,
 .cancel-btn {
   padding: 10px 18px;
   border: none;
@@ -35,6 +36,18 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.pdf-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.pdf-btn:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .preview-btn {

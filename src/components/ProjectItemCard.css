@@ -513,12 +513,12 @@
 .invoice-actions {
   display: flex;
   justify-content: center;
+  gap: 8px;
   margin-top: 10px;
 }
 
-.view-invoice-btn {
-  background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
-  color: white;
+.view-invoice-btn,
+.export-pdf-btn {
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -526,6 +526,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.view-invoice-btn {
+  background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+  color: white;
   box-shadow: 0 2px 6px rgba(23, 162, 184, 0.3);
 }
 
@@ -533,4 +538,31 @@
   background: linear-gradient(135deg, #138496 0%, #1ea080 100%);
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(23, 162, 184, 0.4);
+}
+
+.export-pdf-btn {
+  background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(233, 30, 99, 0.3);
+}
+
+.export-pdf-btn:hover {
+  background: linear-gradient(135deg, #c2185b 0%, #e91e63 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(233, 30, 99, 0.4);
+}
+
+/* Responsive για τα κουμπιά invoice */
+@media (max-width: 480px) {
+  .invoice-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .view-invoice-btn,
+  .export-pdf-btn {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
 }
