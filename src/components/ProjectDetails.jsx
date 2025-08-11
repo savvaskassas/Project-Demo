@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ProjectItemForm from './ProjectItemForm';
 import ProjectItemCard from './ProjectItemCard';
 import ProjectNotes from './ProjectNotes';
+import InvoiceGenerator from './InvoiceGenerator';
 import './ProjectDetails.css';
 
 const ProjectDetails = ({ 
@@ -21,6 +22,7 @@ const ProjectDetails = ({
   const [editingItem, setEditingItem] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isFilterTransitioning, setIsFilterTransitioning] = useState(false);
+  const [showInvoiceGenerator, setShowInvoiceGenerator] = useState(false);
 
   const categories = [
     { value: 'all', label: '📋 Όλα', icon: '📋', color: '#6c757d' },
@@ -105,6 +107,11 @@ const ProjectDetails = ({
     }, 150);
   };
 
+  const handleInvoiceSubmit = (invoiceItem) => {
+    onAddItem(invoiceItem);
+    setShowInvoiceGenerator(false);
+  };
+
   if (showItemForm) {
     return (
       <div className="project-details">
@@ -123,6 +130,18 @@ const ProjectDetails = ({
           }}
           initialData={editingItem}
           isEditing={!!editingItem}
+        />
+      </div>
+    );
+  }
+
+  if (showInvoiceGenerator) {
+    return (
+      <div className="project-details">
+        <InvoiceGenerator
+          project={project}
+          onSubmit={handleInvoiceSubmit}
+          onCancel={() => setShowInvoiceGenerator(false)}
         />
       </div>
     );
@@ -207,12 +226,21 @@ const ProjectDetails = ({
       <div className="project-items-section">
         <div className="section-header">
           <h2>📋 Στοιχεία Έργου ({getFilteredItems().length})</h2>
-          <button 
-            className="add-item-btn"
-            onClick={() => setShowItemForm(true)}
-          >
-            + Προσθήκη Στοιχείου
-          </button>
+          <div className="section-actions">
+            <button 
+              className="create-invoice-btn"
+              onClick={() => setShowInvoiceGenerator(true)}
+              title="Δημιουργία νέου παραστατικού"
+            >
+              🧾 Παραστατικό
+            </button>
+            <button 
+              className="add-item-btn"
+              onClick={() => setShowItemForm(true)}
+            >
+              + Προσθήκη Στοιχείου
+            </button>
+          </div>
         </div>
 
         {/* Category Filter Bar */}

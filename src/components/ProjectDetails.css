@@ -280,6 +280,30 @@
   margin: 0;
 }
 
+.section-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.create-invoice-btn {
+  background: linear-gradient(135deg, #6f42c1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(111, 66, 193, 0.3);
+}
+
+.create-invoice-btn:hover {
+  background: linear-gradient(135deg, #5a2d91 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(111, 66, 193, 0.4);
+}
+
 .add-item-btn {
   background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
   color: white;
@@ -481,6 +505,12 @@
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+    text-align: center;
+  }
+  
+  .section-actions {
+    justify-content: center;
+    flex-wrap: wrap;
   }
   
   .project-items-grid {

@@ -2,6 +2,103 @@ import React from 'react';
 import './ProjectItemCard.css';
 
 const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
+  const generateInvoiceHTML = (invoiceData) => {
+    const formatCurrency = (amount) => `€${parseFloat(amount || 0).toFixed(2)}`;
+    
+    const getTypeLabel = (type) => {
+      const types = {
+        'invoice': 'Τιμολόγιο',
+        'receipt': 'Απόδειξη',
+        'quote': 'Προσφορά',
+        'proforma': 'Προτιμολόγιο'
+      };
+      return types[type] || 'Παραστατικό';
+    };
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${getTypeLabel(invoiceData.type)} ${invoiceData.invoiceNumber}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; color: #000; }
+          .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+          .company-info h1 { margin: 0 0 10px 0; font-size: 24px; }
+          .invoice-info { text-align: right; }
+          .invoice-info h2 { margin: 0 0 10px 0; font-size: 20px; }
+          .client-info { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+          .client-info h3 { margin: 0 0 10px 0; }
+          .project-info { margin-bottom: 20px; padding: 10px; border-left: 4px solid #000; background: #f5f5f5; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+          th { background: #f0f0f0; font-weight: bold; }
+          .text-right { text-align: right; }
+          .totals { margin-top: 20px; text-align: right; }
+          .total { font-weight: bold; font-size: 16px; border-top: 2px solid #000; padding-top: 10px; }
+          .notes, .terms { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="company-info">
+            <h1>${invoiceData.companyName}</h1>
+            <div>${invoiceData.companyAddress.replace(/\n/g, '<br>')}</div>
+            <div>Τηλ: ${invoiceData.companyPhone} | Email: ${invoiceData.companyEmail}</div>
+            <div>ΑΦΜ: ${invoiceData.companyTaxId}</div>
+          </div>
+          <div class="invoice-info">
+            <h2>${getTypeLabel(invoiceData.type)}</h2>
+            <div>Αρ. ${invoiceData.invoiceNumber}</div>
+            <div>Ημ/νία: ${invoiceData.date}</div>
+            ${invoiceData.dueDate ? `<div>Λήξη: ${invoiceData.dueDate}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="client-info">
+          <h3>Στοιχεία Πελάτη:</h3>
+          <div>${invoiceData.clientName}</div>
+          ${invoiceData.clientAddress ? `<div>${invoiceData.clientAddress.replace(/\n/g, '<br>')}</div>` : ''}
+          ${invoiceData.clientTaxId ? `<div>ΑΦΜ: ${invoiceData.clientTaxId}</div>` : ''}
+        </div>
+
+        ${invoiceData.projectTitle ? `<div class="project-info"><strong>Έργο:</strong> ${invoiceData.projectTitle}</div>` : ''}
+
+        <table>
+          <thead>
+            <tr>
+              <th>Περιγραφή</th>
+              <th class="text-right">Ποσότητα</th>
+              <th>Μονάδα</th>
+              <th class="text-right">Τιμή</th>
+              <th class="text-right">Σύνολο</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${invoiceData.items.map(item => `
+              <tr>
+                <td>${item.description}</td>
+                <td class="text-right">${item.quantity}</td>
+                <td>${item.unit}</td>
+                <td class="text-right">${formatCurrency(item.unitPrice)}</td>
+                <td class="text-right">${formatCurrency(item.total)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="totals">
+          <div>Υποσύνολο: ${formatCurrency(invoiceData.subtotal)}</div>
+          <div>ΦΠΑ (${invoiceData.taxRate}%): ${formatCurrency(invoiceData.taxAmount)}</div>
+          <div class="total">Τελικό Σύνολο: ${formatCurrency(invoiceData.total)}</div>
+        </div>
+
+        ${invoiceData.notes ? `<div class="notes"><strong>Σημειώσεις:</strong> ${invoiceData.notes}</div>` : ''}
+        <div class="terms">${invoiceData.terms}</div>
+      </body>
+      </html>
+    `;
+  };
   const getItemTypeIcon = (type) => {
     const icons = {
       'measurement': '📏',
@@ -55,6 +152,54 @@ const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
             <div className="delivery-info">
               {item.deliveryDetails.quantity && <span>Ποσότητα: {item.deliveryDetails.quantity}</span>}
               {item.deliveryDetails.type && <span>Τύπος: {item.deliveryDetails.type}</span>}
+            </div>
+          </div>
+        );
+
+      case 'invoice':
+        return item.invoiceData && (
+          <div className="type-info invoice-info">
+            <h4>Στοιχεία Παραστατικού:</h4>
+            <div className="invoice-details">
+              <div className="invoice-row">
+                <span className="invoice-label">Αριθμός:</span>
+                <span className="invoice-value">{item.invoiceData.invoiceNumber}</span>
+              </div>
+              <div className="invoice-row">
+                <span className="invoice-label">Τύπος:</span>
+                <span className="invoice-value">
+                  {item.invoiceData.type === 'invoice' && '📄 Τιμολόγιο'}
+                  {item.invoiceData.type === 'receipt' && '🧾 Απόδειξη'}
+                  {item.invoiceData.type === 'quote' && '💼 Προσφορά'}
+                  {item.invoiceData.type === 'proforma' && '📋 Προτιμολόγιο'}
+                </span>
+              </div>
+              <div className="invoice-row total-row">
+                <span className="invoice-label">Σύνολο:</span>
+                <span className="invoice-value total-amount">€{parseFloat(item.invoiceData.total || 0).toFixed(2)}</span>
+              </div>
+              {item.invoiceData.dueDate && (
+                <div className="invoice-row">
+                  <span className="invoice-label">Λήξη:</span>
+                  <span className="invoice-value">{formatDate(item.invoiceData.dueDate)}</span>
+                </div>
+              )}
+            </div>
+            <div className="invoice-actions">
+              <button 
+                className="view-invoice-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Άνοιγμα του παραστατικού σε νέο παράθυρο για εκτύπωση
+                  const printWindow = window.open('', '_blank');
+                  printWindow.document.write(generateInvoiceHTML(item.invoiceData));
+                  printWindow.document.close();
+                  printWindow.print();
+                }}
+                title="Προβολή/Εκτύπωση Παραστατικού"
+              >
+                🖨️ Εκτύπωση
+              </button>
             </div>
           </div>
         );
