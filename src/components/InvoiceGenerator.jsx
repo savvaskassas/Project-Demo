@@ -9,16 +9,37 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
     invoiceNumber: initialData?.invoiceNumber || generateInvoiceNumber(),
     date: initialData?.date || new Date().toISOString().split('T')[0],
     dueDate: initialData?.dueDate || '',
+    
+    // Στοιχεία Εταιρείας
     companyName: 'Εταιρεία Μου ΑΕ',
     companyAddress: 'Διεύθυνση Εταιρείας 123\n12345 Αθήνα',
     companyPhone: '210-1234567',
     companyEmail: 'info@company.gr',
     companyTaxId: '123456789',
+    companyDoy: 'ΔΟΥ Αθηνών',
+    companyActivity: 'Κατασκευαστικές Εργασίες',
+    
+    // Στοιχεία Πελάτη
     clientName: project?.client || '',
     clientAddress: '',
     clientPhone: '',
     clientEmail: '',
     clientTaxId: '',
+    clientDoy: '',
+    clientType: 'individual', // individual, company
+    
+    // Στοιχεία Προσφοράς/Προτιμολογίου
+    validUntil: '',
+    deliveryTime: '',
+    paymentTerms: '',
+    
+    // Στοιχεία Τιμολογίου
+    transportMethod: '',
+    transportCost: 0,
+    
+    // Στοιχεία Απόδειξης
+    receiptType: 'service', // service, product
+    
     projectTitle: project?.projectTitle || '',
     items: initialData?.items || [{
       id: 1,
@@ -46,18 +67,129 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
   }
 
   const invoiceTypes = [
-    { value: 'invoice', label: '📄 Τιμολόγιο' },
-    { value: 'receipt', label: '🧾 Απόδειξη' },
-    { value: 'quote', label: '💼 Προσφορά' },
-    { value: 'proforma', label: '📋 Προτιμολόγιο' }
+    { value: 'invoice', label: '📄 Τιμολόγιο', description: 'Για επιχειρήσεις - Πλήρη φορολογικά στοιχεία' },
+    { value: 'receipt', label: '🧾 Απόδειξη', description: 'Για ιδιώτες - Απλοποιημένα στοιχεία' },
+    { value: 'quote', label: '💼 Προσφορά', description: 'Προσφορά τιμών - Χωρίς φορολογικές υποχρεώσεις' },
+    { value: 'proforma', label: '📋 Προτιμολόγιο', description: 'Προκαταβολικό έγγραφο' }
   ];
+
+  // Καθορισμός πεδίων που εμφανίζονται για κάθε τύπο παραστατικού
+  const getRequiredFields = (type) => {
+    const baseFields = {
+      invoice: {
+        company: ['companyName', 'companyTaxId', 'companyDoy', 'companyAddress', 'companyPhone', 'companyEmail', 'companyActivity'],
+        client: ['clientName', 'clientTaxId', 'clientDoy', 'clientAddress', 'clientType'],
+        document: ['dueDate', 'transportMethod', 'transportCost'],
+        items: true,
+        tax: true
+      },
+      receipt: {
+        company: ['companyName', 'companyTaxId', 'companyAddress', 'companyPhone'],
+        client: ['clientName'],
+        document: ['receiptType'],
+        items: true,
+        tax: true
+      },
+      quote: {
+        company: ['companyName', 'companyAddress', 'companyPhone', 'companyEmail'],
+        client: ['clientName', 'clientAddress', 'clientPhone', 'clientEmail'],
+        document: ['validUntil', 'deliveryTime', 'paymentTerms'],
+        items: true,
+        tax: false
+      },
+      proforma: {
+        company: ['companyName', 'companyTaxId', 'companyAddress', 'companyPhone', 'companyEmail'],
+        client: ['clientName', 'clientTaxId', 'clientAddress'],
+        document: ['dueDate', 'paymentTerms'],
+        items: true,
+        tax: true
+      }
+    };
+    return baseFields[type] || baseFields.invoice;
+  };
+
+  const isFieldRequired = (fieldName, section = null) => {
+    const required = getRequiredFields(formData.type);
+    if (section) {
+      return required[section]?.includes(fieldName) || false;
+    }
+    return Object.values(required).some(fields => 
+      Array.isArray(fields) ? fields.includes(fieldName) : false
+    );
+  };
+
+  const shouldShowField = (fieldName, section = null) => {
+    return isFieldRequired(fieldName, section);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Αν αλλάζει ο τύπος παραστατικού, ενημερώνουμε τα προεπιλεγμένα πεδία
+    if (name === 'type') {
+      const defaults = getTypeDefaults(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        ...defaults,
+        // Επανυπολογισμός συνόλων με τον νέο τύπο
+        taxAmount: getRequiredFields(value).tax ? (prev.subtotal + (parseFloat(prev.transportCost) || 0)) * (defaults.taxRate / 100) : 0,
+        total: getRequiredFields(value).tax ? 
+          (prev.subtotal + (parseFloat(prev.transportCost) || 0)) + ((prev.subtotal + (parseFloat(prev.transportCost) || 0)) * (defaults.taxRate / 100)) :
+          prev.subtotal + (parseFloat(prev.transportCost) || 0)
+      }));
+    } 
+    // Αν αλλάζει το κόστος μεταφοράς, επανυπολογίζουμε τα σύνολα
+    else if (name === 'transportCost') {
+      setFormData(prev => {
+        const transportCost = parseFloat(value || 0);
+        const baseAmount = prev.subtotal + transportCost;
+        const taxAmount = getRequiredFields(prev.type).tax ? baseAmount * (prev.taxRate / 100) : 0;
+        const total = baseAmount + taxAmount;
+
+        return {
+          ...prev,
+          [name]: value,
+          taxAmount,
+          total
+        };
+      });
+    }
+    else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const getTypeDefaults = (type) => {
+    const defaults = {
+      invoice: {
+        terms: 'Όροι πληρωμής: 30 ημέρες από την έκδοση του τιμολογίου',
+        taxRate: 24,
+        transportMethod: 'Ιδίοις μέσοις',
+        transportCost: 0
+      },
+      receipt: {
+        terms: 'Ευχαριστούμε για την προτίμησή σας',
+        taxRate: 24,
+        receiptType: 'service'
+      },
+      quote: {
+        terms: 'Η προσφορά ισχύει για περιορισμένο χρονικό διάστημα',
+        taxRate: 0,
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 ημέρες από σήμερα
+        deliveryTime: '2-3 εβδομάδες',
+        paymentTerms: '50% προκαταβολή, 50% στην παράδοση'
+      },
+      proforma: {
+        terms: 'Προτιμολόγιο - Δεν αποτελεί φορολογικό στοιχείο',
+        taxRate: 24,
+        paymentTerms: 'Πληρωμή προ της παράδοσης'
+      }
+    };
+    return defaults[type] || {};
   };
 
   const handleItemChange = (itemId, field, value) => {
@@ -78,8 +210,12 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
 
       // Αυτόματος υπολογισμός συνολικών
       const subtotal = newItems.reduce((sum, item) => sum + parseFloat(item.total || 0), 0);
-      const taxAmount = subtotal * (prev.taxRate / 100);
-      const total = subtotal + taxAmount;
+      const transportCost = parseFloat(prev.transportCost || 0);
+      const baseAmount = subtotal + transportCost;
+      
+      // Υπολογισμός ΦΠΑ μόνο για τύπους που το απαιτούν
+      const taxAmount = getRequiredFields(prev.type).tax ? baseAmount * (prev.taxRate / 100) : 0;
+      const total = baseAmount + taxAmount;
 
       return {
         ...prev,
@@ -113,8 +249,10 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
         
         // Επανυπολογισμός συνολικών
         const subtotal = newItems.reduce((sum, item) => sum + parseFloat(item.total || 0), 0);
-        const taxAmount = subtotal * (prev.taxRate / 100);
-        const total = subtotal + taxAmount;
+        const transportCost = parseFloat(prev.transportCost || 0);
+        const baseAmount = subtotal + transportCost;
+        const taxAmount = getRequiredFields(prev.type).tax ? baseAmount * (prev.taxRate / 100) : 0;
+        const total = baseAmount + taxAmount;
 
         return {
           ...prev,
@@ -129,49 +267,174 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
 
   const generatePDF = async () => {
     try {
+      console.log('Ξεκινά η δημιουργία PDF...', formData);
+      
+      // Έλεγχος ότι υπάρχουν δεδομένα
+      if (!formData.items || formData.items.length === 0) {
+        alert('Παρακαλώ προσθέστε τουλάχιστον ένα είδος στο παραστατικό');
+        return;
+      }
+
+      if (!formData.clientName.trim()) {
+        alert('Παρακαλώ συμπληρώστε το όνομα του πελάτη');
+        return;
+      }
+
+      // Δημιουργία HTML
+      const htmlContent = generateInvoiceHTML(formData);
+      console.log('HTML Content generated:', htmlContent.substring(0, 200) + '...');
+
       // Δημιουργία ενός προσωρινού div με το παραστατικό
       const tempDiv = document.createElement('div');
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.padding = '20mm';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '210mm';
+      tempDiv.style.height = 'auto';
+      tempDiv.style.padding = '0';
+      tempDiv.style.margin = '0';
       tempDiv.style.fontFamily = 'Arial, sans-serif';
       tempDiv.style.fontSize = '12px';
       tempDiv.style.lineHeight = '1.4';
       tempDiv.style.color = '#000';
       tempDiv.style.backgroundColor = '#fff';
+      tempDiv.style.boxSizing = 'border-box';
+      tempDiv.style.overflow = 'visible';
       
-      tempDiv.innerHTML = generateInvoiceHTML(formData);
+      tempDiv.innerHTML = htmlContent;
       document.body.appendChild(tempDiv);
 
-      // Δημιουργία canvas από το HTML
+      console.log('Temp div created and added to DOM');
+
+      // Περίμενε λίγο για το rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log('Creating canvas...');
+
+      // Δημιουργία canvas από το HTML με βελτιωμένες ρυθμίσεις
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false,
-        width: 794, // A4 width in pixels at 96 DPI
-        height: 1123 // A4 height in pixels at 96 DPI
+        logging: true,
+        allowTaint: false,
+        foreignObjectRendering: false,
+        letterRendering: true,
+        width: 794, // A4 width at 96 DPI
+        height: Math.max(tempDiv.scrollHeight, 1123), // A4 height minimum
+        windowWidth: 794,
+        windowHeight: 1123
       });
+
+      console.log('Canvas created:', canvas.width, 'x', canvas.height);
 
       // Αφαίρεση του προσωρινού div
       document.body.removeChild(tempDiv);
 
+      // Έλεγχος ότι το canvas δημιουργήθηκε σωστά
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Το canvas δεν δημιουργήθηκε σωστά');
+      }
+
       // Δημιουργία PDF
+      console.log('Creating PDF...');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+      // Υπολογισμός διαστάσεων εικόνας
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = canvasWidth / canvasHeight;
+      
+      // Προσαρμογή στις διαστάσεις A4 με περιθώρια
+      const margin = 10; // 10mm περιθώρια
+      const maxWidth = pdfWidth - (2 * margin);
+      const maxHeight = pdfHeight - (2 * margin);
+      
+      let imgWidth = maxWidth;
+      let imgHeight = imgWidth / ratio;
+      
+      // Αν το ύψος υπερβαίνει τη σελίδα, προσάρμοσε βάσει ύψους
+      if (imgHeight > maxHeight) {
+        imgHeight = maxHeight;
+        imgWidth = imgHeight * ratio;
+      }
+      
+      const imgX = (pdfWidth - imgWidth) / 2;
+      const imgY = margin;
+
+      // Προσθήκη εικόνας στο PDF
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      console.log('Adding image to PDF...');
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth, imgHeight, '', 'FAST');
+      
+      // Προσθήκη metadata στο PDF
+      const typeLabel = getTypeLabel(formData.type).replace(/[^\w\s]/gi, '');
+      pdf.setProperties({
+        title: `${typeLabel} ${formData.invoiceNumber}`,
+        subject: `${typeLabel} για ${formData.clientName}`,
+        author: formData.companyName,
+        creator: 'Σύστημα Διαχείρισης Έργων'
+      });
+      
+      // Δημιουργία ονόματος αρχείου
+      const docType = typeLabel.replace(/\s+/g, '_');
+      const clientName = formData.clientName
+        .replace(/[^a-zA-Zα-ωΑ-Ω0-9\s]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 20); // Περιορισμός μήκους
+      const date = formData.date.replace(/-/g, '');
+      const fileName = `${docType}_${formData.invoiceNumber}_${clientName}_${date}.pdf`;
+      
+      console.log('Saving PDF:', fileName);
       
       // Αποθήκευση του PDF
-      const fileName = `${getTypeLabel(formData.type)}_${formData.invoiceNumber}_${formData.date}.pdf`;
       pdf.save(fileName);
       
-      alert('✅ Το PDF δημιουργήθηκε επιτυχώς!');
+      // Μήνυμα επιτυχίας
+      const successMessage = `✅ Το PDF δημιουργήθηκε επιτυχώς!
+
+📄 Τύπος: ${getTypeLabel(formData.type)}
+🔢 Αριθμός: ${formData.invoiceNumber}
+👤 Πελάτης: ${formData.clientName}
+💰 Αξία: €${formData.total.toFixed(2)}
+📁 Αρχείο: ${fileName}`;
+      
+      alert(successMessage);
+      console.log('PDF creation completed successfully');
+      
     } catch (error) {
-      console.error('Σφάλμα κατά τη δημιουργία PDF:', error);
-      alert('❌ Σφάλμα κατά τη δημιουργία PDF. Δοκιμάστε ξανά.');
+      console.error('Λεπτομερές σφάλμα κατά τη δημιουργία PDF:', error);
+      
+      // Καθαρισμός DOM σε περίπτωση σφάλματος
+      const tempDivs = document.querySelectorAll('div[style*="position: absolute"][style*="left: -9999px"]');
+      tempDivs.forEach(div => {
+        try {
+          document.body.removeChild(div);
+        } catch (e) {
+          console.warn('Could not remove temp div:', e);
+        }
+      });
+      
+      // Λεπτομερές μήνυμα σφάλματος
+      let errorMessage = `❌ Σφάλμα κατά τη δημιουργία PDF\n\n`;
+      
+      if (error.message.includes('html2canvas')) {
+        errorMessage += `Πρόβλημα με τη δημιουργία εικόνας από το HTML.\n`;
+        errorMessage += `Δοκιμάστε να:\n`;
+        errorMessage += `• Ανανεώστε τη σελίδα και δοκιμάστε ξανά\n`;
+        errorMessage += `• Ελέγξτε ότι όλα τα πεδία είναι συμπληρωμένα\n`;
+      } else if (error.message.includes('jsPDF')) {
+        errorMessage += `Πρόβλημα με τη δημιουργία του PDF αρχείου.\n`;
+      } else {
+        errorMessage += `Γενικό πρόβλημα: ${error.message}\n`;
+      }
+      
+      errorMessage += `\nΑν το πρόβλημα επιμένει, δοκιμάστε την εκτύπωση του παραστατικού.`;
+      
+      alert(errorMessage);
     }
   };
 
@@ -180,71 +443,295 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
     
     const getTypeLabel = (type) => {
       const types = {
-        'invoice': 'Τιμολόγιο',
-        'receipt': 'Απόδειξη',
-        'quote': 'Προσφορά',
-        'proforma': 'Προτιμολόγιο'
+        'invoice': 'ΤΙΜΟΛΟΓΙΟ',
+        'receipt': 'ΑΠΟΔΕΙΞΗ',
+        'quote': 'ΠΡΟΣΦΟΡΑ',
+        'proforma': 'ΠΡΟΤΙΜΟΛΟΓΙΟ'
       };
-      return types[type] || 'Παραστατικό';
+      return types[type] || 'ΠΑΡΑΣΤΑΤΙΚΟ';
     };
 
+    const getTypeColor = (type) => {
+      const colors = {
+        'invoice': '#2196F3',
+        'receipt': '#4CAF50', 
+        'quote': '#FF9800',
+        'proforma': '#9C27B0'
+      };
+      return colors[type] || '#2196F3';
+    };
+
+    // Καθορισμός πεδίων που εμφανίζονται για κάθε τύπο παραστατικού (local copy)
+    const getRequiredFieldsLocal = (type) => {
+      const baseFields = {
+        invoice: {
+          company: ['companyName', 'companyTaxId', 'companyDoy', 'companyAddress', 'companyPhone', 'companyEmail', 'companyActivity'],
+          client: ['clientName', 'clientTaxId', 'clientDoy', 'clientAddress', 'clientType'],
+          document: ['dueDate', 'transportMethod', 'transportCost'],
+          items: true,
+          tax: true
+        },
+        receipt: {
+          company: ['companyName', 'companyTaxId', 'companyAddress', 'companyPhone'],
+          client: ['clientName'],
+          document: ['receiptType'],
+          items: true,
+          tax: true
+        },
+        quote: {
+          company: ['companyName', 'companyAddress', 'companyPhone', 'companyEmail'],
+          client: ['clientName', 'clientAddress', 'clientPhone', 'clientEmail'],
+          document: ['validUntil', 'deliveryTime', 'paymentTerms'],
+          items: true,
+          tax: false
+        },
+        proforma: {
+          company: ['companyName', 'companyTaxId', 'companyAddress', 'companyPhone', 'companyEmail'],
+          client: ['clientName', 'clientTaxId', 'clientAddress'],
+          document: ['dueDate', 'paymentTerms'],
+          items: true,
+          tax: true
+        }
+      };
+      return baseFields[type] || baseFields.invoice;
+    };
+
+    const shouldShowFieldLocal = (fieldName, section = null) => {
+      const required = getRequiredFieldsLocal(invoiceData.type);
+      if (section) {
+        return required[section]?.includes(fieldName) || false;
+      }
+      return Object.values(required).some(fields => 
+        Array.isArray(fields) ? fields.includes(fieldName) : false
+      );
+    };
+
+    // Υπολογισμός συνόλων με κόστος μεταφοράς
+    const subtotal = invoiceData.subtotal || 0;
+    const transportCost = parseFloat(invoiceData.transportCost || 0);
+    const baseAmount = subtotal + transportCost;
+    const taxAmount = getRequiredFieldsLocal(invoiceData.type).tax ? baseAmount * (invoiceData.taxRate / 100) : 0;
+    const total = baseAmount + taxAmount;
+
     return `
-      <div style="font-family: Arial, sans-serif; max-width: 794px; margin: 0 auto; padding: 20px; color: #000; line-height: 1.4;">
-        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px;">
+      <div style="font-family: 'Arial', sans-serif; max-width: 794px; margin: 0 auto; padding: 15mm; color: #000; line-height: 1.4; background: #fff;">
+        
+        <!-- Header Section -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid ${getTypeColor(invoiceData.type)}; padding-bottom: 20px; margin-bottom: 25px;">
           <div style="flex: 1;">
-            <h1 style="margin: 0 0 10px 0; font-size: 24px; color: #000;">${invoiceData.companyName}</h1>
-            <div style="margin-bottom: 5px;">${invoiceData.companyAddress.replace(/\n/g, '<br>')}</div>
-            <div style="margin-bottom: 5px;">Τηλ: ${invoiceData.companyPhone} | Email: ${invoiceData.companyEmail}</div>
-            <div>ΑΦΜ: ${invoiceData.companyTaxId}</div>
+            <h1 style="margin: 0 0 8px 0; font-size: 22px; color: ${getTypeColor(invoiceData.type)}; font-weight: bold;">${invoiceData.companyName}</h1>
+            ${shouldShowFieldLocal('companyTaxId', 'company') ? `<div style="margin-bottom: 4px; font-size: 12px;"><strong>ΑΦΜ:</strong> ${invoiceData.companyTaxId}</div>` : ''}
+            ${shouldShowFieldLocal('companyDoy', 'company') ? `<div style="margin-bottom: 4px; font-size: 12px;"><strong>ΔΟΥ:</strong> ${invoiceData.companyDoy}</div>` : ''}
+            ${invoiceData.companyGemiNumber ? `<div style="margin-bottom: 4px; font-size: 12px;"><strong>Αρ. ΓΕΜΗ:</strong> ${invoiceData.companyGemiNumber}</div>` : ''}
+            ${shouldShowFieldLocal('companyActivity', 'company') ? `<div style="margin-bottom: 8px; font-size: 11px; color: #666;">${invoiceData.companyActivity}</div>` : ''}
+            <div style="margin-bottom: 4px; font-size: 11px;">${invoiceData.companyAddress.replace(/\n/g, '<br>')}</div>
+            <div style="font-size: 11px;">
+              ${shouldShowFieldLocal('companyPhone', 'company') ? `Τηλ: ${invoiceData.companyPhone}` : ''}
+              ${shouldShowFieldLocal('companyEmail', 'company') ? ` | Email: ${invoiceData.companyEmail}` : ''}
+            </div>
+            ${invoiceData.companyIban ? `<div style="margin-top: 4px; font-size: 10px; color: #666;"><strong>IBAN:</strong> ${invoiceData.companyIban}</div>` : ''}
           </div>
-          <div style="text-align: right;">
-            <h2 style="margin: 0 0 10px 0; font-size: 20px; color: #000;">${getTypeLabel(invoiceData.type)}</h2>
-            <div style="margin-bottom: 5px; font-weight: bold;">Αρ. ${invoiceData.invoiceNumber}</div>
-            <div style="margin-bottom: 5px;">Ημ/νία: ${invoiceData.date}</div>
-            ${invoiceData.dueDate ? `<div>Λήξη: ${invoiceData.dueDate}</div>` : ''}
+          <div style="text-align: right; min-width: 200px;">
+            <h2 style="margin: 0 0 8px 0; font-size: 24px; color: ${getTypeColor(invoiceData.type)}; font-weight: bold;">${getTypeLabel(invoiceData.type)}</h2>
+            <div style="margin-bottom: 4px; font-size: 14px; font-weight: bold;">Αρ. ${invoiceData.invoiceNumber}</div>
+            <div style="margin-bottom: 4px; font-size: 12px;">Ημ/νία: ${new Date(invoiceData.date).toLocaleDateString('el-GR')}</div>
+            ${invoiceData.dueDate ? `<div style="font-size: 12px; color: #d32f2f;">Λήξη: ${new Date(invoiceData.dueDate).toLocaleDateString('el-GR')}</div>` : ''}
+            ${invoiceData.validUntil ? `<div style="font-size: 12px; color: #f57c00;">Ισχύει έως: ${new Date(invoiceData.validUntil).toLocaleDateString('el-GR')}</div>` : ''}
           </div>
         </div>
 
-        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9;">
-          <h3 style="margin: 0 0 10px 0; font-size: 14px;">Στοιχεία Πελάτη:</h3>
-          <div style="font-weight: bold;">${invoiceData.clientName}</div>
-          ${invoiceData.clientAddress ? `<div>${invoiceData.clientAddress.replace(/\n/g, '<br>')}</div>` : ''}
-          ${invoiceData.clientTaxId ? `<div>ΑΦΜ: ${invoiceData.clientTaxId}</div>` : ''}
+        <!-- Client Information -->
+        <div style="margin-bottom: 20px; padding: 12px; border: 1px solid #e0e0e0; background: #fafafa; border-radius: 4px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 13px; color: ${getTypeColor(invoiceData.type)}; text-transform: uppercase;">
+            ${invoiceData.type === 'quote' ? 'Στοιχεία Ενδιαφερομένου:' : 'Στοιχεία Πελάτη:'}
+          </h3>
+          <div style="font-weight: bold; margin-bottom: 4px; font-size: 12px;">${invoiceData.clientName}</div>
+          
+          ${shouldShowFieldLocal('clientTaxId', 'client') && invoiceData.clientTaxId ? `<div style="margin-bottom: 4px; font-size: 11px;"><strong>ΑΦΜ:</strong> ${invoiceData.clientTaxId}</div>` : ''}
+          ${shouldShowFieldLocal('clientDoy', 'client') && invoiceData.clientDoy ? `<div style="margin-bottom: 4px; font-size: 11px;"><strong>ΔΟΥ:</strong> ${invoiceData.clientDoy}</div>` : ''}
+          ${invoiceData.clientAddress ? `<div style="margin-bottom: 4px; font-size: 11px;">${invoiceData.clientAddress.replace(/\n/g, '<br>')}</div>` : ''}
+          ${invoiceData.clientPhone || invoiceData.clientEmail ? `<div style="font-size: 11px;">${invoiceData.clientPhone ? `Τηλ: ${invoiceData.clientPhone}` : ''}${invoiceData.clientPhone && invoiceData.clientEmail ? ' | ' : ''}${invoiceData.clientEmail ? `Email: ${invoiceData.clientEmail}` : ''}</div>` : ''}
         </div>
 
-        ${invoiceData.projectTitle ? `<div style="margin-bottom: 20px; padding: 10px; border-left: 4px solid #000; background: #f5f5f5;"><strong>Έργο:</strong> ${invoiceData.projectTitle}</div>` : ''}
+        ${invoiceData.projectTitle ? `<div style="margin-bottom: 20px; padding: 8px 12px; border-left: 4px solid ${getTypeColor(invoiceData.type)}; background: #f5f5f5; font-size: 12px;"><strong>Έργο:</strong> ${invoiceData.projectTitle}</div>` : ''}
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <!-- Special Document Fields -->
+        ${(invoiceData.type === 'quote' || invoiceData.type === 'invoice' || invoiceData.type === 'receipt' || invoiceData.type === 'proforma') && 
+          (invoiceData.deliveryTime || invoiceData.paymentTerms || invoiceData.transportMethod || invoiceData.receiptType) ? `
+          <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #e0e0e0; background: #f9f9f9; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: ${getTypeColor(invoiceData.type)};">
+              ${invoiceData.type === 'quote' ? 'Στοιχεία Προσφοράς:' : 
+                invoiceData.type === 'invoice' ? 'Στοιχεία Παράδοσης:' :
+                invoiceData.type === 'receipt' ? 'Στοιχεία Απόδειξης:' : 'Στοιχεία Προτιμολογίου:'}
+            </h4>
+            ${invoiceData.deliveryTime ? `<div style="font-size: 11px; margin-bottom: 3px;"><strong>Χρόνος Παράδοσης:</strong> ${invoiceData.deliveryTime}</div>` : ''}
+            ${invoiceData.paymentTerms ? `<div style="font-size: 11px; margin-bottom: 3px;"><strong>Όροι Πληρωμής:</strong> ${invoiceData.paymentTerms}</div>` : ''}
+            ${invoiceData.transportMethod ? `<div style="font-size: 11px; margin-bottom: 3px;"><strong>Μεταφορά:</strong> ${invoiceData.transportMethod}</div>` : ''}
+            ${invoiceData.receiptType ? `<div style="font-size: 11px;"><strong>Τύπος:</strong> ${
+              invoiceData.receiptType === 'service' ? 'Παροχή Υπηρεσιών' :
+              invoiceData.receiptType === 'product' ? 'Πώληση Προϊόντων' : 'Μικτό (Προϊόντα & Υπηρεσίες)'
+            }</div>` : ''}
+          </div>
+        ` : ''}
+
+        <!-- Items Table -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
           <thead>
-            <tr style="background: #f0f0f0;">
+            <tr style="background: ${getTypeColor(invoiceData.type)}; color: white;">
               <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold;">Περιγραφή</th>
-              <th style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold;">Ποσότητα</th>
-              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold;">Μονάδα</th>
-              <th style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold;">Τιμή</th>
-              <th style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold;">Σύνολο</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 80px;">Ποσότητα</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 60px;">Μονάδα</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold; width: 90px;">Τιμή</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold; width: 90px;">Σύνολο</th>
             </tr>
           </thead>
           <tbody>
-            ${invoiceData.items.map(item => `
-              <tr>
-                <td style="border: 1px solid #000; padding: 8px;">${item.description}</td>
-                <td style="border: 1px solid #000; padding: 8px; text-align: right;">${item.quantity}</td>
-                <td style="border: 1px solid #000; padding: 8px;">${item.unit}</td>
-                <td style="border: 1px solid #000; padding: 8px; text-align: right;">${formatCurrency(item.unitPrice)}</td>
-                <td style="border: 1px solid #000; padding: 8px; text-align: right;">${formatCurrency(item.total)}</td>
+            ${invoiceData.items.map((item, index) => `
+              <tr style="background: ${index % 2 === 0 ? '#fff' : '#f9f9f9'};">
+                <td style="border: 1px solid #ddd; padding: 8px; vertical-align: top;">${item.description}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.unit}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${formatCurrency(item.unitPrice)}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold;">${formatCurrency(item.total)}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
 
-        <div style="margin-top: 20px; text-align: right;">
-          <div style="margin-bottom: 5px;">Υποσύνολο: ${formatCurrency(invoiceData.subtotal)}</div>
-          <div style="margin-bottom: 5px;">ΦΠΑ (${invoiceData.taxRate}%): ${formatCurrency(invoiceData.taxAmount)}</div>
-          <div style="font-weight: bold; font-size: 16px; border-top: 2px solid #000; padding-top: 10px;">Τελικό Σύνολο: ${formatCurrency(invoiceData.total)}</div>
+        <!-- Totals Section -->
+        <div style="margin-top: 20px; text-align: right; font-size: 12px;">
+          <div style="margin-bottom: 5px; padding: 5px 10px; background: #f5f5f5;">
+            <strong>Υποσύνολο: ${formatCurrency(subtotal)}</strong>
+          </div>
+          
+          ${transportCost > 0 ? `
+            <div style="margin-bottom: 5px; padding: 5px 10px; background: #f0f8ff;">
+              <strong>Μεταφορικά: ${formatCurrency(transportCost)}</strong>
+            </div>
+          ` : ''}
+
+          ${getRequiredFieldsLocal(invoiceData.type).tax ? `
+            <div style="margin-bottom: 5px; padding: 5px 10px; background: #fff3e0;">
+              <strong>ΦΠΑ (${invoiceData.taxRate}%): ${formatCurrency(taxAmount)}</strong>
+            </div>
+          ` : ''}
+          
+          <div style="font-weight: bold; font-size: 16px; padding: 8px 10px; background: ${getTypeColor(invoiceData.type)}; color: white; border-radius: 4px;">
+            ${invoiceData.type === 'quote' ? 'ΣΥΝΟΛΙΚΗ ΑΞΙΑ' : 'ΤΕΛΙΚΟ ΣΥΝΟΛΟ'}: ${formatCurrency(total)}
+          </div>
+          
+          ${invoiceData.type === 'quote' ? `
+            <div style="margin-top: 8px; padding: 6px 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; font-size: 10px; color: #856404;">
+              * Η προσφορά δεν περιλαμβάνει ΦΠΑ
+            </div>
+          ` : ''}
         </div>
 
-        ${invoiceData.notes ? `<div style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9;"><strong>Σημειώσεις:</strong> ${invoiceData.notes}</div>` : ''}
-        <div style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; text-align: center; font-style: italic;">${invoiceData.terms}</div>
+        <!-- Ψηφιακή Υπογραφή -->
+        ${(invoiceData.requiresSignature && invoiceData.signatoryName) ? `
+          <div style="margin-top: 15px; padding: 8px; border: 1px solid #7b68ee; background: #f5f3ff; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: #7b68ee;">Ψηφιακή Υπογραφή:</h4>
+            <div style="font-size: 11px; line-height: 1.4;">
+              <strong>Υπογράφων:</strong> ${invoiceData.signatoryName}<br>
+              ${invoiceData.signatoryPosition ? `<strong>Θέση:</strong> ${invoiceData.signatoryPosition}<br>` : ''}
+              <div style="margin-top: 8px; font-style: italic; color: #7b68ee;">
+                ✓ Απαιτείται ψηφιακή υπογραφή για την εγκυρότητα του εγγράφου
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- AADE MARK -->
+        ${(invoiceData.type === 'invoice' && invoiceData.submittedToAADE) ? `
+          <div style="margin-top: 15px; padding: 8px; border: 1px solid #28a745; background: #e8f5e8; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: #28a745;">Υποβολή AADE:</h4>
+            <div style="font-size: 11px; line-height: 1.4;">
+              <strong>✓ Υποβλήθηκε στο AADE</strong><br>
+              ${invoiceData.aadeMark ? `<strong>MARK:</strong> ${invoiceData.aadeMark}` : '<em>Αναμονή MARK από AADE</em>'}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Τρόπος Πληρωμής -->
+        ${invoiceData.paymentMethod ? `
+          <div style="margin-top: 15px; padding: 8px; border: 1px solid #17a2b8; background: #e7f7f9; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: #17a2b8;">Πληρωμή:</h4>
+            <div style="font-size: 11px; line-height: 1.4;">
+              <strong>Τρόπος Πληρωμής:</strong> ${
+                invoiceData.paymentMethod === 'cash' ? 'Μετρητά' :
+                invoiceData.paymentMethod === 'card' ? 'Κάρτα' :
+                invoiceData.paymentMethod === 'bank_transfer' ? 'Τραπεζικό έμβασμα' :
+                invoiceData.paymentMethod === 'deposit' ? 'Κατάθεση σε λογαριασμό' :
+                invoiceData.paymentMethod === 'check' ? 'Επιταγή' :
+                invoiceData.paymentMethod === 'iban' ? 'Κατάθεση σε IBAN' :
+                invoiceData.paymentMethod
+              }
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Υπεύθυνα Πρόσωπα -->
+        ${(invoiceData.type !== 'receipt' && (invoiceData.issuedBy || invoiceData.issuedByPosition)) ? `
+          <div style="margin-top: 20px; padding: 10px; border: 1px solid #e0e0e0; background: #f0f8ff; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: ${getTypeColor(invoiceData.type)}; font-weight: bold;">Υπεύθυνα Πρόσωπα:</h4>
+            ${invoiceData.issuedBy ? `<div style="font-size: 11px; margin-bottom: 3px;"><strong>Υπεύθυνος Έκδοσης:</strong> ${invoiceData.issuedBy}</div>` : ''}
+            ${invoiceData.issuedByPosition ? `<div style="font-size: 11px;"><strong>Θέση/Ιδιότητα:</strong> ${invoiceData.issuedByPosition}</div>` : ''}
+          </div>
+        ` : ''}
+
+        <!-- Ψηφιακή Υπογραφή -->
+        ${((invoiceData.type === 'quote' || invoiceData.type === 'proforma') && invoiceData.requiresSignature) ? `
+          <div style="margin-top: 15px; padding: 12px; border: 2px solid #7b68ee; background: #f8f6ff; border-radius: 4px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #7b68ee; font-weight: bold; text-align: center;">✍️ ΨΗΦΙΑΚΗ ΥΠΟΓΡΑΦΗ</h4>
+            ${invoiceData.signatoryName ? `<div style="font-size: 11px; margin-bottom: 5px; text-align: center;"><strong>Υπογράφων:</strong> ${invoiceData.signatoryName}</div>` : ''}
+            ${invoiceData.signatoryPosition ? `<div style="font-size: 11px; text-align: center;"><strong>Θέση:</strong> ${invoiceData.signatoryPosition}</div>` : ''}
+            <div style="margin-top: 15px; border-top: 1px solid #7b68ee; height: 30px; position: relative;">
+              <div style="position: absolute; bottom: 0; right: 10px; font-size: 9px; color: #666;">Υπογραφή</div>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- AADE MARK -->
+        ${(invoiceData.type === 'invoice' && invoiceData.submittedToAADE && invoiceData.aadeMark) ? `
+          <div style="margin-top: 15px; padding: 10px; border: 2px solid #28a745; background: #e8f5e8; border-radius: 4px; text-align: center;">
+            <h4 style="margin: 0 0 5px 0; font-size: 12px; color: #28a745; font-weight: bold;">📄 ΥΠΟΒΟΛΗ AADE</h4>
+            <div style="font-size: 11px; color: #155724;"><strong>MARK:</strong> ${invoiceData.aadeMark}</div>
+            <div style="font-size: 9px; color: #666; margin-top: 3px;">Υποβλήθηκε στην ΑΑΔΕ</div>
+          </div>
+        ` : ''}
+
+        <!-- Παρακράτηση για Δημόσιο -->
+        ${(invoiceData.type === 'invoice' && invoiceData.clientType === 'public' && invoiceData.subtotal > 0) ? `
+          <div style="margin-top: 15px; padding: 10px; border: 1px solid #ffc107; background: #fff3cd; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: #856404; font-weight: bold;">💰 ΠΑΡΑΚΡΑΤΗΣΗ ΦΟΡΟΥ</h4>
+            <div style="font-size: 11px; margin-bottom: 3px;"><strong>Καθαρή Αξία:</strong> €${parseFloat(invoiceData.subtotal || 0).toFixed(2)}</div>
+            <div style="font-size: 11px; color: #856404;"><strong>Παρακράτηση MTPY 0.06%:</strong> €${(parseFloat(invoiceData.subtotal || 0) * 0.0006).toFixed(2)}</div>
+          </div>
+        ` : ''}
+
+        <!-- Notes and Terms -->
+        ${invoiceData.notes ? `
+          <div style="margin-top: 20px; padding: 10px; border: 1px solid #e0e0e0; background: #f9f9f9; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 12px; color: ${getTypeColor(invoiceData.type)};">Σημειώσεις:</h4>
+            <div style="font-size: 11px; line-height: 1.4;">${invoiceData.notes}</div>
+          </div>
+        ` : ''}
+        
+        <div style="margin-top: 15px; padding: 8px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 10px; color: #666; font-style: italic;">
+          ${invoiceData.terms}
+        </div>
+
+        <!-- Document Type Specific Footer -->
+        ${invoiceData.type === 'proforma' ? `
+          <div style="margin-top: 15px; padding: 8px; background: #fce4ec; border: 1px solid #f8bbd9; border-radius: 4px; text-align: center; font-size: 10px; color: #880e4f;">
+            <strong>ΠΡΟΣΟΧΗ:</strong> Το προτιμολόγιο δεν αποτελεί φορολογικό στοιχείο
+          </div>
+        ` : ''}
+
+        <!-- Print Footer -->
+        <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 9px; color: #999;">
+          Εκτυπώθηκε: ${new Date().toLocaleDateString('el-GR')} ${new Date().toLocaleTimeString('el-GR')}
+        </div>
       </div>
     `;
   };
@@ -252,7 +739,6 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Δημιουργία του στοιχείου έργου
     const invoiceItem = {
       type: 'invoice',
       title: `${invoiceTypes.find(t => t.value === formData.type)?.label} ${formData.invoiceNumber}`,
@@ -261,13 +747,25 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
       startEndDates: formData.dueDate ? `Λήξη: ${formData.dueDate}` : '',
       stage: 'Εκδόθηκε',
       notes: `Αξία: €${formData.total.toFixed(2)}${formData.notes ? '\n' + formData.notes : ''}`,
-      invoiceData: formData
+      invoiceData: formData,
+      // Προσθήκη πεδίων για εκτύπωση και PDF
+      canPrint: true,
+      canExportPDF: true,
+      exportType: 'invoice' // Για να ξέρει το ProjectItemCard τι τύπο εξαγωγής να κάνει
     };
 
-    // Εμφάνιση μηνύματος επιτυχίας
+    const documentEntry = {
+      id: `doc-${Date.now()}`,
+      invoiceNumber: formData.invoiceNumber,
+      type: formData.type,
+      date: formData.date,
+      clientName: formData.clientName,
+      amount: formData.total
+    };
+
     alert(`✅ Το παραστατικό ${formData.invoiceNumber} δημιουργήθηκε επιτυχώς!`);
     
-    onSubmit(invoiceItem);
+    onSubmit(invoiceItem, documentEntry);
   };
 
   const formatCurrency = (amount) => {
@@ -276,6 +774,16 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
 
   const getTypeLabel = (type) => {
     return invoiceTypes.find(t => t.value === type)?.label || 'Παραστατικό';
+  };
+
+  const getTypeColor = (type) => {
+    const colors = {
+      'invoice': '#2196F3',
+      'receipt': '#4CAF50', 
+      'quote': '#FF9800',
+      'proforma': '#9C27B0'
+    };
+    return colors[type] || '#2196F3';
   };
 
   return (
@@ -314,6 +822,9 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
                   </option>
                 ))}
               </select>
+              <small className="field-description">
+                {invoiceTypes.find(t => t.value === formData.type)?.description}
+              </small>
             </div>
             <div className="form-group">
               <label>Αριθμός Παραστατικού</label>
@@ -335,15 +846,17 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
                 required
               />
             </div>
-            <div className="form-group">
-              <label>Ημερομηνία Λήξης</label>
-              <input
-                type="date"
-                name="dueDate"
-                value={formData.dueDate}
-                onChange={handleInputChange}
-              />
-            </div>
+            {(formData.type === 'invoice' || formData.type === 'proforma') && (
+              <div className="form-group">
+                <label>Ημερομηνία Λήξης</label>
+                <input
+                  type="date"
+                  name="dueDate"
+                  value={formData.dueDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -351,117 +864,332 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
         <div className="form-section">
           <h3>Στοιχεία Εταιρείας</h3>
           <div className="form-row">
-            <div className="form-group">
-              <label>Επωνυμία</label>
-              <input
-                type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>ΑΦΜ</label>
-              <input
-                type="text"
-                name="companyTaxId"
-                value={formData.companyTaxId}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+            {shouldShowField('companyName', 'company') && (
+              <div className="form-group">
+                <label>Επωνυμία *</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            )}
+            {shouldShowField('companyTaxId', 'company') && (
+              <div className="form-group">
+                <label>ΑΦΜ *</label>
+                <input
+                  type="text"
+                  name="companyTaxId"
+                  value={formData.companyTaxId}
+                  onChange={handleInputChange}
+                  required
+                  pattern="[0-9]{9}"
+                  title="Εισάγετε 9ψήφιο ΑΦΜ"
+                />
+              </div>
+            )}
+            {shouldShowField('companyDoy', 'company') && (
+              <div className="form-group">
+                <label>ΔΟΥ *</label>
+                <input
+                  type="text"
+                  name="companyDoy"
+                  value={formData.companyDoy}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="π.χ. ΔΟΥ Αθηνών"
+                />
+              </div>
+            )}
           </div>
+          {shouldShowField('companyActivity', 'company') && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Είδος Επιχείρησης</label>
+                <input
+                  type="text"
+                  name="companyActivity"
+                  value={formData.companyActivity}
+                  onChange={handleInputChange}
+                  placeholder="π.χ. Κατασκευαστικές Εργασίες"
+                />
+              </div>
+            </div>
+          )}
+          {shouldShowField('companyAddress', 'company') && (
+            <div className="form-row">
+              <div className="form-group full-width">
+                <label>Διεύθυνση *</label>
+                <textarea
+                  name="companyAddress"
+                  value={formData.companyAddress}
+                  onChange={handleInputChange}
+                  rows="3"
+                  required
+                  placeholder="Οδός, Αριθμός&#10;ΤΚ, Πόλη"
+                />
+              </div>
+            </div>
+          )}
           <div className="form-row">
-            <div className="form-group full-width">
-              <label>Διεύθυνση</label>
-              <textarea
-                name="companyAddress"
-                value={formData.companyAddress}
-                onChange={handleInputChange}
-                rows="3"
-                required
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Τηλέφωνο</label>
-              <input
-                type="text"
-                name="companyPhone"
-                value={formData.companyPhone}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="companyEmail"
-                value={formData.companyEmail}
-                onChange={handleInputChange}
-              />
-            </div>
+            {shouldShowField('companyPhone', 'company') && (
+              <div className="form-group">
+                <label>Τηλέφωνο {isFieldRequired('companyPhone', 'company') ? '*' : ''}</label>
+                <input
+                  type="text"
+                  name="companyPhone"
+                  value={formData.companyPhone}
+                  onChange={handleInputChange}
+                  required={isFieldRequired('companyPhone', 'company')}
+                  placeholder="210-1234567"
+                />
+              </div>
+            )}
+            {shouldShowField('companyEmail', 'company') && (
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="companyEmail"
+                  value={formData.companyEmail}
+                  onChange={handleInputChange}
+                  placeholder="info@company.gr"
+                />
+              </div>
+            )}
           </div>
         </div>
 
         {/* Στοιχεία Πελάτη */}
         <div className="form-section">
           <h3>Στοιχεία Πελάτη</h3>
+          {shouldShowField('clientType', 'client') && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Τύπος Πελάτη</label>
+                <select
+                  name="clientType"
+                  value={formData.clientType}
+                  onChange={handleInputChange}
+                >
+                  <option value="individual">Ιδιώτης</option>
+                  <option value="company">Επιχείρηση</option>
+                </select>
+              </div>
+            </div>
+          )}
           <div className="form-row">
-            <div className="form-group">
-              <label>Επωνυμία/Όνομα</label>
-              <input
-                type="text"
-                name="clientName"
-                value={formData.clientName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>ΑΦΜ</label>
-              <input
-                type="text"
-                name="clientTaxId"
-                value={formData.clientTaxId}
-                onChange={handleInputChange}
-              />
-            </div>
+            {shouldShowField('clientName', 'client') && (
+              <div className="form-group">
+                <label>
+                  {formData.clientType === 'company' ? 'Επωνυμία Εταιρείας' : 'Όνομα/Επωνυμία'} *
+                </label>
+                <input
+                  type="text"
+                  name="clientName"
+                  value={formData.clientName}
+                  onChange={handleInputChange}
+                  required
+                  placeholder={formData.clientType === 'company' ? 'Εταιρεία ΑΕ' : 'Όνομα Επώνυμο'}
+                />
+              </div>
+            )}
+            {shouldShowField('clientTaxId', 'client') && (
+              <div className="form-group">
+                <label>
+                  ΑΦΜ {formData.type === 'invoice' ? '*' : ''}
+                </label>
+                <input
+                  type="text"
+                  name="clientTaxId"
+                  value={formData.clientTaxId}
+                  onChange={handleInputChange}
+                  required={formData.type === 'invoice'}
+                  pattern="[0-9]{9}"
+                  title="Εισάγετε 9ψήφιο ΑΦΜ"
+                  placeholder="123456789"
+                />
+              </div>
+            )}
+            {shouldShowField('clientDoy', 'client') && (
+              <div className="form-group">
+                <label>ΔΟΥ Πελάτη</label>
+                <input
+                  type="text"
+                  name="clientDoy"
+                  value={formData.clientDoy}
+                  onChange={handleInputChange}
+                  placeholder="π.χ. ΔΟΥ Θεσσαλονίκης"
+                />
+              </div>
+            )}
           </div>
+          {shouldShowField('clientAddress', 'client') && (
+            <div className="form-row">
+              <div className="form-group full-width">
+                <label>Διεύθυνση {isFieldRequired('clientAddress', 'client') ? '*' : ''}</label>
+                <textarea
+                  name="clientAddress"
+                  value={formData.clientAddress}
+                  onChange={handleInputChange}
+                  rows="3"
+                  required={isFieldRequired('clientAddress', 'client')}
+                  placeholder="Οδός, Αριθμός&#10;ΤΚ, Πόλη"
+                />
+              </div>
+            </div>
+          )}
           <div className="form-row">
-            <div className="form-group full-width">
-              <label>Διεύθυνση</label>
-              <textarea
-                name="clientAddress"
-                value={formData.clientAddress}
-                onChange={handleInputChange}
-                rows="3"
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Τηλέφωνο</label>
-              <input
-                type="text"
-                name="clientPhone"
-                value={formData.clientPhone}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="clientEmail"
-                value={formData.clientEmail}
-                onChange={handleInputChange}
-              />
-            </div>
+            {shouldShowField('clientPhone', 'client') && (
+              <div className="form-group">
+                <label>Τηλέφωνο</label>
+                <input
+                  type="text"
+                  name="clientPhone"
+                  value={formData.clientPhone}
+                  onChange={handleInputChange}
+                  placeholder="210-1234567"
+                />
+              </div>
+            )}
+            {shouldShowField('clientEmail', 'client') && (
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="clientEmail"
+                  value={formData.clientEmail}
+                  onChange={handleInputChange}
+                  placeholder="client@email.gr"
+                />
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Ειδικά Πεδία ανά Τύπο Παραστατικού */}
+        {(shouldShowField('validUntil', 'document') || 
+          shouldShowField('deliveryTime', 'document') || 
+          shouldShowField('paymentTerms', 'document') ||
+          shouldShowField('transportMethod', 'document') ||
+          shouldShowField('receiptType', 'document')) && (
+          <div className="form-section">
+            <h3>
+              {formData.type === 'quote' && 'Στοιχεία Προσφοράς'}
+              {formData.type === 'invoice' && 'Στοιχεία Τιμολογίου'}
+              {formData.type === 'receipt' && 'Στοιχεία Απόδειξης'}
+              {formData.type === 'proforma' && 'Στοιχεία Προτιμολογίου'}
+            </h3>
+            
+            {/* Πεδία για Προσφορά */}
+            {formData.type === 'quote' && (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Ισχύει Μέχρι *</label>
+                    <input
+                      type="date"
+                      name="validUntil"
+                      value={formData.validUntil}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Χρόνος Παράδοσης</label>
+                    <input
+                      type="text"
+                      name="deliveryTime"
+                      value={formData.deliveryTime}
+                      onChange={handleInputChange}
+                      placeholder="π.χ. 2-3 εβδομάδες"
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group full-width">
+                    <label>Όροι Πληρωμής</label>
+                    <input
+                      type="text"
+                      name="paymentTerms"
+                      value={formData.paymentTerms}
+                      onChange={handleInputChange}
+                      placeholder="π.χ. 50% προκαταβολή, 50% στην παράδοση"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Πεδία για Τιμολόγιο */}
+            {formData.type === 'invoice' && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Τρόπος Μεταφοράς</label>
+                  <select
+                    name="transportMethod"
+                    value={formData.transportMethod}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Επιλέξτε...</option>
+                    <option value="Ιδίοις μέσοις">Ιδίοις μέσοις</option>
+                    <option value="Μεταφορική εταιρεία">Μεταφορική εταιρεία</option>
+                    <option value="Courier">Courier</option>
+                    <option value="Παραλαβή από κατάστημα">Παραλαβή από κατάστημα</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Κόστος Μεταφοράς (€)</label>
+                  <input
+                    type="number"
+                    name="transportCost"
+                    value={formData.transportCost}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Πεδία για Απόδειξη */}
+            {formData.type === 'receipt' && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Τύπος Απόδειξης</label>
+                  <select
+                    name="receiptType"
+                    value={formData.receiptType}
+                    onChange={handleInputChange}
+                  >
+                    <option value="service">Παροχή Υπηρεσιών</option>
+                    <option value="product">Πώληση Προϊόντων</option>
+                    <option value="mixed">Μικτό (Προϊόντα & Υπηρεσίες)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Πεδία για Προτιμολόγιο */}
+            {formData.type === 'proforma' && (
+              <div className="form-row">
+                <div className="form-group full-width">
+                  <label>Όροι Πληρωμής</label>
+                  <input
+                    type="text"
+                    name="paymentTerms"
+                    value={formData.paymentTerms}
+                    onChange={handleInputChange}
+                    placeholder="π.χ. Πληρωμή προ της παράδοσης"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Έργο */}
         <div className="form-section">
@@ -559,34 +1287,57 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
               <label>Υποσύνολο:</label>
               <span>{formatCurrency(formData.subtotal)}</span>
             </div>
-            <div className="total-row">
-              <label>
-                ΦΠΑ ({formData.taxRate}%):
-                <input
-                  type="number"
-                  name="taxRate"
-                  value={formData.taxRate}
-                  onChange={(e) => {
-                    const rate = parseFloat(e.target.value || 0);
-                    setFormData(prev => ({
-                      ...prev,
-                      taxRate: rate,
-                      taxAmount: prev.subtotal * (rate / 100),
-                      total: prev.subtotal + (prev.subtotal * (rate / 100))
-                    }));
-                  }}
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  style={{ width: '60px', marginLeft: '10px' }}
-                />
-              </label>
-              <span>{formatCurrency(formData.taxAmount)}</span>
-            </div>
+            
+            {/* Κόστος μεταφοράς για τιμολόγια */}
+            {formData.type === 'invoice' && formData.transportCost > 0 && (
+              <div className="total-row">
+                <label>Μεταφορικά:</label>
+                <span>{formatCurrency(formData.transportCost)}</span>
+              </div>
+            )}
+
+            {/* ΦΠΑ μόνο για τιμολόγια, αποδείξεις και προτιμολόγια */}
+            {getRequiredFields(formData.type).tax && (
+              <div className="total-row">
+                <label>
+                  ΦΠΑ ({formData.taxRate}%):
+                  <input
+                    type="number"
+                    name="taxRate"
+                    value={formData.taxRate}
+                    onChange={(e) => {
+                      const rate = parseFloat(e.target.value || 0);
+                      const baseAmount = formData.subtotal + (formData.transportCost || 0);
+                      setFormData(prev => ({
+                        ...prev,
+                        taxRate: rate,
+                        taxAmount: baseAmount * (rate / 100),
+                        total: baseAmount + (baseAmount * (rate / 100))
+                      }));
+                    }}
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    style={{ width: '60px', marginLeft: '10px' }}
+                  />
+                </label>
+                <span>{formatCurrency(formData.taxAmount)}</span>
+              </div>
+            )}
+            
             <div className="total-row final">
-              <label>Τελικό Σύνολο:</label>
+              <label>
+                {formData.type === 'quote' ? 'Συνολική Αξία:' : 'Τελικό Σύνολο:'}
+              </label>
               <span>{formatCurrency(formData.total)}</span>
             </div>
+
+            {/* Πληροφορίες για προσφορά */}
+            {formData.type === 'quote' && (
+              <div className="quote-info">
+                <small>* Η προσφορά δεν περιλαμβάνει ΦΠΑ</small>
+              </div>
+            )}
           </div>
         </div>
 

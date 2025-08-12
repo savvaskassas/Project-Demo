@@ -674,3 +674,74 @@
     padding: 8px 16px;
   }
 }
+
+/* Στυλ για ενότητα παραστατικών */
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #007bff;
+  transition: all 0.2s ease;
+}
+
+.document-item:hover {
+  background: #e9ecef;
+  transform: translateX(2px);
+}
+
+.document-icon {
+  font-size: 1.2rem;
+}
+
+.document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.document-number {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.document-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.document-amount {
+  font-weight: 700;
+  color: #28a745;
+  font-size: 0.85rem;
+}
+
+/* Responsive για παραστατικά */
+@media (max-width: 768px) {
+  .document-item {
+    padding: 6px 10px;
+  }
+  
+  .document-info {
+    gap: 1px;
+  }
+  
+  .document-number {
+    font-size: 0.85rem;
+  }
+  
+  .document-date,
+  .document-amount {
+    font-size: 0.7rem;
+  }
+}

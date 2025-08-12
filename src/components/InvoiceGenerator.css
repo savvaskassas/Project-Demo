@@ -508,3 +508,67 @@
     font-size: 1rem;
   }
 }
+
+/* Νέα στυλ για προσαρμοστικά πεδία */
+.form-group small.field-description {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.quote-info {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.quote-info small {
+  color: #856404;
+  font-weight: 500;
+}
+
+/* Στυλ για επιλογή τύπου πελάτη */
+.form-group select[name="clientType"] {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid #90caf9;
+  font-weight: 600;
+}
+
+/* Στυλ για ειδικά πεδία */
+.form-group select[name="transportMethod"],
+.form-group select[name="receiptType"] {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+/* Validation styling */
+.form-group input:required:invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-group input:required:valid {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Responsive για τα νέα πεδία */
+@media (max-width: 768px) {
+  .form-group small.field-description {
+    font-size: 0.75rem;
+  }
+  
+  .quote-info {
+    padding: 6px 10px;
+  }
+  
+  .form-group select[name="clientType"] {
+    font-size: 0.9rem;
+  }
+}

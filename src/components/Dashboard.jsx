@@ -17,8 +17,21 @@ const Dashboard = () => {
   const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
   const [isCompactView, setIsCompactView] = useState(false);
 
-  // Mock data για τα έργα
+  // Φόρτωση δεδομένων από localStorage ή χρήση mock data
   useEffect(() => {
+    const savedProjects = localStorage.getItem('projectManagementData');
+    
+    if (savedProjects) {
+      try {
+        const parsedProjects = JSON.parse(savedProjects);
+        setProjects(parsedProjects);
+        return;
+      } catch (error) {
+        console.error('Σφάλμα κατά τη φόρτωση δεδομένων:', error);
+      }
+    }
+    
+    // Mock data για τα έργα (μόνο αν δεν υπάρχουν αποθηκευμένα δεδομένα)
     const mockProjects = [
       {
         id: 1,
@@ -94,6 +107,13 @@ const Dashboard = () => {
     ];
     setProjects(mockProjects);
   }, []);
+
+  // Αποθήκευση δεδομένων στο localStorage όταν αλλάζουν τα projects
+  useEffect(() => {
+    if (projects.length > 0) {
+      localStorage.setItem('projectManagementData', JSON.stringify(projects));
+    }
+  }, [projects]);
 
   // Φιλτράρισμα έργων βάσει αναζήτησης και ημερομηνιών
   const filteredProjects = projects.filter(project => {

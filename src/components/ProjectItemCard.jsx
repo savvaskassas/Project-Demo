@@ -156,6 +156,36 @@ const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
     }
   };
 
+  // Συνάρτηση για εκτύπωση παραστατικού
+  const handlePrintInvoice = (invoiceData) => {
+    try {
+      // Δημιουργούμε παράθυρο εκτύπωσης
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('Παρακαλώ επιτρέψτε τα pop-ups για εκτύπωση');
+        return;
+      }
+      
+      const htmlContent = generateInvoiceHTML(invoiceData);
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Περιμένουμε να φορτωθεί και κάνουμε εκτύπωση
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.close();
+      };
+    } catch (error) {
+      console.error('Error printing invoice:', error);
+      alert('Σφάλμα κατά την εκτύπωση του παραστατικού');
+    }
+  };
+
+  // Συνάρτηση για εξαγωγή σε PDF
+  const handleExportPDF = (invoiceData) => {
+    generatePDF(invoiceData);
+  };
+
   const getItemTypeIcon = (type) => {
     const icons = {
       'measurement': '📏',
@@ -302,6 +332,25 @@ const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
           <button className="delete-item-btn" onClick={onDelete} title="Διαγραφή">
             🗑️
           </button>
+          {/* Κουμπιά για παραστατικά */}
+          {item.type === 'invoice' && item.invoiceData && (
+            <>
+              <button 
+                className="print-invoice-btn" 
+                onClick={() => handlePrintInvoice(item.invoiceData)} 
+                title="Εκτύπωση Παραστατικού"
+              >
+                🖨️
+              </button>
+              <button 
+                className="pdf-invoice-btn" 
+                onClick={() => handleExportPDF(item.invoiceData)} 
+                title="Εξαγωγή σε PDF"
+              >
+                📄
+              </button>
+            </>
+          )}
         </div>
       </div>
 
