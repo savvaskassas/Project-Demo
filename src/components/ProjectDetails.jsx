@@ -108,6 +108,7 @@ const ProjectDetails = ({
   };
 
   const handleInvoiceSubmit = (invoiceItem, documentEntry) => {
+    console.log('handleInvoiceSubmit called with:', { invoiceItem, documentEntry });
     onAddItem(invoiceItem);
     
     // Ενημέρωση του έργου με το νέο παραστατικό
@@ -116,6 +117,7 @@ const ProjectDetails = ({
       documents: [...(project.documents || []), documentEntry]
     };
     
+    console.log('Updated project:', updatedProject);
     onUpdateProject(updatedProject);
     setShowInvoiceGenerator(false);
   };

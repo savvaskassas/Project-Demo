@@ -203,12 +203,14 @@ const Dashboard = () => {
   };
 
   const handleAddItemToProject = (projectId, itemData) => {
+    console.log('handleAddItemToProject called with:', { projectId, itemData });
     const updatedProjects = projects.map(project => {
       if (project.id === projectId) {
         const newItem = {
           ...itemData,
           id: (project.items?.length || 0) + 1
         };
+        console.log('Adding new item:', newItem);
         return {
           ...project,
           items: [...(project.items || []), newItem],
@@ -217,6 +219,7 @@ const Dashboard = () => {
       }
       return project;
     });
+    console.log('Updated projects:', updatedProjects);
     setProjects(updatedProjects);
   };
 
