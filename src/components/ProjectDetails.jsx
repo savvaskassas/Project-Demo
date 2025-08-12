@@ -108,16 +108,26 @@ const ProjectDetails = ({
   };
 
   const handleInvoiceSubmit = (invoiceItem, documentEntry) => {
-    console.log('handleInvoiceSubmit called with:', { invoiceItem, documentEntry });
+    console.log('📄 Προσθήκη παραστατικού στο έργο:', {
+      itemType: invoiceItem.type,
+      itemTitle: invoiceItem.title,
+      projectId: project.id
+    });
+    
     onAddItem(invoiceItem);
     
-    // Ενημέρωση του έργου με το νέο παραστατικό
+    // Ενημέρωση του έργου με το νέο παραστατικό και το νέο item
     const updatedProject = {
       ...project,
+      items: [...(project.items || []), invoiceItem],
       documents: [...(project.documents || []), documentEntry]
     };
     
-    console.log('Updated project:', updatedProject);
+    console.log('🔄 Ενημέρωση έργου:', {
+      totalItems: updatedProject.items.length,
+      invoiceItems: updatedProject.items.filter(i => i.type === 'invoice').length
+    });
+    
     onUpdateProject(updatedProject);
     setShowInvoiceGenerator(false);
   };

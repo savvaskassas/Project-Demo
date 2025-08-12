@@ -66,6 +66,14 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
     return `INV-${year}${month}${day}-${time}`;
   }
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('el-GR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   const invoiceTypes = [
     { value: 'invoice', label: '📄 Τιμολόγιο', description: 'Για επιχειρήσεις - Πλήρη φορολογικά στοιχεία' },
     { value: 'receipt', label: '🧾 Απόδειξη', description: 'Για ιδιώτες - Απλοποιημένα στοιχεία' },
@@ -739,15 +747,24 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Δημιουργία επαγγελματικού τίτλου για το παραστατικό
+    const invoiceTypeLabel = invoiceTypes.find(t => t.value === formData.type)?.label || 'Παραστατικό';
+    const professionalTitle = `${invoiceTypeLabel} #${formData.invoiceNumber} - ${formData.clientName}`;
+    
     const invoiceItem = {
       type: 'invoice',
-      title: `${invoiceTypes.find(t => t.value === formData.type)?.label} ${formData.invoiceNumber}`,
+      title: professionalTitle,
       client: formData.clientName,
       date: formData.date,
       startEndDates: formData.dueDate ? `Λήξη: ${formData.dueDate}` : '',
       stage: 'Εκδόθηκε',
-      notes: `Αξία: €${formData.total.toFixed(2)}${formData.notes ? '\n' + formData.notes : ''}`,
-      invoiceData: formData,
+      notes: `Συνολική Αξία: €${formData.total.toFixed(2)}${formData.vatAmount > 0 ? ` (ΦΠΑ: €${formData.vatAmount.toFixed(2)})` : ''}${formData.notes ? '\nΣημειώσεις: ' + formData.notes : ''}`,
+      invoiceData: {
+        ...formData,
+        timestamp: Date.now(),
+        createdBy: 'InvoiceGenerator',
+        version: '1.0'
+      },
       // Προσθήκη πεδίων για εκτύπωση και PDF
       canPrint: true,
       canExportPDF: true,
@@ -760,10 +777,27 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
       type: formData.type,
       date: formData.date,
       clientName: formData.clientName,
-      amount: formData.total
+      amount: formData.total,
+      createdAt: new Date().toISOString()
     };
 
-    alert(`✅ Το παραστατικό ${formData.invoiceNumber} δημιουργήθηκε επιτυχώς!`);
+    console.log('🧾 Δημιουργία παραστατικού:', {
+      invoiceNumber: formData.invoiceNumber,
+      client: formData.clientName,
+      total: formData.total,
+      title: professionalTitle
+    });
+
+    // Εμφάνιση επιτυχούς μηνύματος
+    alert(`✅ Το παραστατικό ${formData.invoiceNumber} δημιουργήθηκε επιτυχώς!
+    
+📋 Στοιχεία:
+• Αριθμός: ${formData.invoiceNumber}
+• Πελάτης: ${formData.clientName}
+• Αξία: €${formData.total.toFixed(2)}
+• Ημερομηνία: ${formatDate(formData.date)}
+
+✨ Το παραστατικό αποθηκεύτηκε στα στοιχεία του έργου!`);
     
     onSubmit(invoiceItem, documentEntry);
   };
@@ -1445,6 +1479,404 @@ const InvoiceGenerator = ({ onSubmit, onCancel, project, initialData = null }) =
       </div>
     </div>
   );
+};
+
+// Export της generateInvoiceHTML για χρήση σε άλλα components
+export const generateInvoiceHTML = (invoiceData) => {
+  const formatCurrency = (amount) => `€${parseFloat(amount || 0).toFixed(2)}`;
+  
+  const getTypeLabel = (type) => {
+    const types = {
+      'invoice': 'ΤΙΜΟΛΟΓΙΟ',
+      'receipt': 'ΑΠΟΔΕΙΞΗ',
+      'quote': 'ΠΡΟΣΦΟΡΑ',
+      'proforma': 'ΠΡΟΤΙΜΟΛΟΓΙΟ'
+    };
+    return types[type] || 'ΠΑΡΑΣΤΑΤΙΚΟ';
+  };
+
+  const getTypeColor = (type) => {
+    const colors = {
+      'invoice': '#2196F3',
+      'receipt': '#4CAF50',
+      'quote': '#FF9800', 
+      'proforma': '#9C27B0'
+    };
+    return colors[type] || '#2196F3';
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('el-GR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  return `
+    <!DOCTYPE html>
+    <html lang="el">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${getTypeLabel(invoiceData.type)} ${invoiceData.invoiceNumber}</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.4;
+          color: #000;
+          background: #fff;
+          padding: 20mm;
+          font-size: 11px;
+        }
+        
+        .invoice-container {
+          max-width: 170mm;
+          margin: 0 auto;
+          background: white;
+          border: 1px solid #ddd;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-header {
+          background: linear-gradient(135deg, ${getTypeColor(invoiceData.type)}22, ${getTypeColor(invoiceData.type)}11);
+          border-bottom: 3px solid ${getTypeColor(invoiceData.type)};
+          padding: 15px 20px;
+          position: relative;
+        }
+        
+        .header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        
+        .company-info h1 {
+          color: ${getTypeColor(invoiceData.type)};
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        
+        .company-details {
+          font-size: 10px;
+          color: #666;
+          line-height: 1.3;
+        }
+        
+        .invoice-type {
+          text-align: right;
+          background: ${getTypeColor(invoiceData.type)};
+          color: white;
+          padding: 8px 15px;
+          border-radius: 8px;
+          font-weight: bold;
+          font-size: 14px;
+          margin-bottom: 10px;
+        }
+        
+        .invoice-number {
+          text-align: right;
+          font-size: 12px;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        .invoice-body { padding: 20px; }
+        
+        .parties-section {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20px;
+          gap: 20px;
+        }
+        
+        .party-info {
+          flex: 1;
+          padding: 12px;
+          border: 1px solid #e0e0e0;
+          border-radius: 6px;
+          background: #fafafa;
+        }
+        
+        .party-title {
+          font-weight: bold;
+          color: ${getTypeColor(invoiceData.type)};
+          margin-bottom: 8px;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+          font-size: 10px;
+        }
+        
+        .items-table th {
+          background: ${getTypeColor(invoiceData.type)};
+          color: white;
+          padding: 8px;
+          text-align: left;
+          font-weight: bold;
+          font-size: 9px;
+        }
+        
+        .items-table td {
+          padding: 6px 8px;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .items-table tr:nth-child(even) {
+          background: #f9f9f9;
+        }
+        
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        .totals-section {
+          margin-top: 20px;
+          border-top: 2px solid ${getTypeColor(invoiceData.type)};
+          padding-top: 15px;
+        }
+        
+        .totals-table {
+          width: 100%;
+          font-size: 11px;
+        }
+        
+        .totals-table td {
+          padding: 4px 8px;
+          border: none;
+        }
+        
+        .total-row {
+          font-weight: bold;
+          font-size: 12px;
+          background: ${getTypeColor(invoiceData.type)}22;
+          border-top: 2px solid ${getTypeColor(invoiceData.type)};
+        }
+        
+        .payment-info {
+          margin-top: 20px;
+          padding: 12px;
+          background: #f8f9fa;
+          border-left: 4px solid ${getTypeColor(invoiceData.type)};
+          font-size: 10px;
+        }
+        
+        .notes-section {
+          margin-top: 15px;
+          padding: 10px;
+          background: #fff9e6;
+          border: 1px solid #ffeb3b;
+          border-radius: 4px;
+          font-size: 10px;
+        }
+        
+        .footer {
+          margin-top: 20px;
+          padding-top: 10px;
+          border-top: 1px solid #e0e0e0;
+          text-align: center;
+          font-size: 8px;
+          color: #999;
+        }
+        
+        .tax-info {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 15px;
+          font-size: 9px;
+          color: #666;
+        }
+        
+        ${invoiceData.type === 'proforma' ? `
+        .proforma-warning {
+          background: #fff3cd;
+          border: 1px solid #ffecb5;
+          color: #856404;
+          padding: 10px;
+          margin: 15px 0;
+          border-radius: 4px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 10px;
+        }
+        ` : ''}
+        
+        @media print {
+          body { margin: 0; padding: 0; }
+          .invoice-container { box-shadow: none; border: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+          <div class="header-content">
+            <div class="company-info">
+              <h1>${invoiceData.companyName || 'ΕΤΑΙΡΙΑ ΑΕ'}</h1>
+              <div class="company-details">
+                ${invoiceData.companyAddress || 'Διεύθυνση Εταιρίας'}<br>
+                ΤΚ: ${invoiceData.companyPostal || '12345'}, ${invoiceData.companyCity || 'Αθήνα'}<br>
+                ΤΗΛ: ${invoiceData.companyPhone || '210-1234567'}<br>
+                EMAIL: ${invoiceData.companyEmail || 'info@company.gr'}
+              </div>
+            </div>
+            <div class="invoice-info">
+              <div class="invoice-type">${getTypeLabel(invoiceData.type)}</div>
+              <div class="invoice-number">
+                <strong>Αρ. ${invoiceData.invoiceNumber}</strong><br>
+                <span style="font-size: 10px;">Ημ/νία: ${formatDate(invoiceData.date)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="invoice-body">
+          <!-- Parties Information -->
+          <div class="parties-section">
+            <div class="party-info">
+              <div class="party-title">Στοιχεία Εκδότη</div>
+              <strong>${invoiceData.companyName || 'ΕΤΑΙΡΙΑ ΑΕ'}</strong><br>
+              ΑΦΜ: ${invoiceData.companyVAT || '123456789'}<br>
+              ΔΟΥ: ${invoiceData.companyTaxOffice || 'Α\' ΑΘΗΝΩΝ'}<br>
+              ${invoiceData.companyGEMI ? `ΓΕΜΗ: ${invoiceData.companyGEMI}<br>` : ''}
+              ${invoiceData.companyActivity || 'Επαγγελματική Δραστηριότητα'}
+            </div>
+            <div class="party-info">
+              <div class="party-title">Στοιχεία Πελάτη</div>
+              <strong>${invoiceData.clientName}</strong><br>
+              ${invoiceData.clientAddress || ''}<br>
+              ${invoiceData.clientCity ? `${invoiceData.clientPostal || ''} ${invoiceData.clientCity}<br>` : ''}
+              ${invoiceData.clientVAT ? `ΑΦΜ: ${invoiceData.clientVAT}<br>` : ''}
+              ${invoiceData.clientTaxOffice ? `ΔΟΥ: ${invoiceData.clientTaxOffice}<br>` : ''}
+              ${invoiceData.clientPhone ? `ΤΗΛ: ${invoiceData.clientPhone}` : ''}
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">Α/Α</th>
+                <th>Περιγραφή</th>
+                <th style="width: 60px;" class="text-center">Ποσότητα</th>
+                <th style="width: 80px;" class="text-right">Τιμή Μον.</th>
+                <th style="width: 80px;" class="text-right">Σύνολο</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${invoiceData.items?.map((item, index) => `
+                <tr>
+                  <td class="text-center">${index + 1}</td>
+                  <td>${item.description || ''}</td>
+                  <td class="text-center">${item.quantity || 1}</td>
+                  <td class="text-right">${formatCurrency(item.price)}</td>
+                  <td class="text-right">${formatCurrency((item.quantity || 1) * (item.price || 0))}</td>
+                </tr>
+              `).join('') || `
+                <tr>
+                  <td class="text-center">1</td>
+                  <td>Υπηρεσίες/Προϊόντα</td>
+                  <td class="text-center">1</td>
+                  <td class="text-right">${formatCurrency(invoiceData.subtotal || invoiceData.total)}</td>
+                  <td class="text-right">${formatCurrency(invoiceData.subtotal || invoiceData.total)}</td>
+                </tr>
+              `}
+            </tbody>
+          </table>
+
+          <!-- Totals -->
+          <div class="totals-section">
+            <table class="totals-table">
+              <tr>
+                <td style="width: 70%;"></td>
+                <td><strong>Υποσύνολο:</strong></td>
+                <td class="text-right"><strong>${formatCurrency(invoiceData.subtotal || invoiceData.total)}</strong></td>
+              </tr>
+              ${invoiceData.discountAmount > 0 ? `
+              <tr>
+                <td></td>
+                <td>Έκπτωση (${invoiceData.discountPercentage || 0}%):</td>
+                <td class="text-right">-${formatCurrency(invoiceData.discountAmount)}</td>
+              </tr>
+              ` : ''}
+              ${invoiceData.vatAmount > 0 ? `
+              <tr>
+                <td></td>
+                <td>ΦΠΑ (${invoiceData.vatPercentage || 24}%):</td>
+                <td class="text-right">${formatCurrency(invoiceData.vatAmount)}</td>
+              </tr>
+              ` : ''}
+              ${invoiceData.withholdingAmount > 0 ? `
+              <tr>
+                <td></td>
+                <td>Παρακράτηση (${invoiceData.withholdingPercentage || 0}%):</td>
+                <td class="text-right">-${formatCurrency(invoiceData.withholdingAmount)}</td>
+              </tr>
+              ` : ''}
+              <tr class="total-row">
+                <td></td>
+                <td><strong>ΣΥΝΟΛΟ:</strong></td>
+                <td class="text-right"><strong>${formatCurrency(invoiceData.total)}</strong></td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Payment Information -->
+          ${invoiceData.paymentMethod || invoiceData.paymentTerms ? `
+          <div class="payment-info">
+            <strong>Στοιχεία Πληρωμής:</strong><br>
+            ${invoiceData.paymentMethod ? `Τρόπος Πληρωμής: ${invoiceData.paymentMethod}<br>` : ''}
+            ${invoiceData.paymentTerms ? `Όροι Πληρωμής: ${invoiceData.paymentTerms}<br>` : ''}
+            ${invoiceData.bankAccount ? `Λογαριασμός: ${invoiceData.bankAccount}` : ''}
+          </div>
+          ` : ''}
+
+          <!-- Notes -->
+          ${invoiceData.notes ? `
+          <div class="notes-section">
+            <strong>Σημειώσεις:</strong><br>
+            ${invoiceData.notes}
+          </div>
+          ` : ''}
+
+          <!-- Tax Information -->
+          <div class="tax-info">
+            <div>
+              <strong>Φορολογικά Στοιχεία:</strong><br>
+              ${invoiceData.companyVAT ? `ΑΦΜ Εκδότη: ${invoiceData.companyVAT}` : ''}<br>
+              ${invoiceData.companyTaxOffice ? `ΔΟΥ: ${invoiceData.companyTaxOffice}` : ''}
+            </div>
+            <div>
+              <strong>Ημερομηνία Έκδοσης:</strong><br>
+              ${formatDate(invoiceData.date)}
+            </div>
+          </div>
+
+          ${invoiceData.type === 'proforma' ? `
+          <div class="proforma-warning">
+            <strong>ΠΡΟΣΟΧΗ:</strong> Το προτιμολόγιο δεν αποτελεί φορολογικό στοιχείο
+          </div>
+          ` : ''}
+
+          <!-- Footer -->
+          <div class="footer">
+            Εκτυπώθηκε: ${new Date().toLocaleDateString('el-GR')} ${new Date().toLocaleTimeString('el-GR')}
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
 };
 
 export default InvoiceGenerator;

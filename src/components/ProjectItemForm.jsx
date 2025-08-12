@@ -24,7 +24,6 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = f
     { value: 'maintenance', label: '⚙️ Συντήρηση' },
     { value: 'photo', label: '📷 Φωτογραφία' },
     { value: 'document', label: '📄 Έγγραφο' },
-    { value: 'invoice', label: '🧾 Παραστατικό' },
     { value: 'other', label: '📋 Άλλο' }
   ];
 
@@ -119,7 +118,6 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = f
       case 'delivery':
       case 'maintenance':
       case 'document':
-      case 'invoice':
         if (!formData.client.trim()) {
           newErrors.client = 'Αυτό το πεδίο είναι υποχρεωτικό';
         }
@@ -642,121 +640,6 @@ const ProjectItemForm = ({ onSubmit, onCancel, initialData = null, isEditing = f
                 onChange={handleInputChange}
                 rows="3"
                 placeholder="Προσθέστε λεπτομέρειες για το έγγραφο..."
-              />
-            </div>
-          </>
-        );
-
-      case 'invoice':
-        return (
-          <>
-            {/* Τίτλος */}
-            <div className="form-group">
-              <label>Περιγραφή Παραστατικού *</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                className={errors.title ? 'error' : ''}
-                placeholder="π.χ. Τιμολόγιο #001234 - Εγκατάσταση Τζαμιών"
-              />
-              {errors.title && <span className="error-message">{errors.title}</span>}
-            </div>
-
-            {/* Πελάτης */}
-            <div className="form-group">
-              <label>Πελάτης *</label>
-              <input
-                type="text"
-                name="client"
-                value={formData.client}
-                onChange={handleInputChange}
-                className={errors.client ? 'error' : ''}
-                placeholder="π.χ. Δήμος Ρόδου"
-              />
-              {errors.client && <span className="error-message">{errors.client}</span>}
-            </div>
-
-            {/* Ημερομηνία */}
-            <div className="form-group">
-              <label>Ημερομηνία Έκδοσης *</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                className={errors.date ? 'error' : ''}
-              />
-              {errors.date && <span className="error-message">{errors.date}</span>}
-            </div>
-
-            {/* Τύπος Παραστατικού */}
-            <div className="form-group">
-              <label>Τύπος Παραστατικού *</label>
-              <select
-                name="stage"
-                value={formData.stage}
-                onChange={handleInputChange}
-                className={errors.stage ? 'error' : ''}
-              >
-                <option value="">Επιλέξτε τύπο</option>
-                <option value="Προσφορά">Προσφορά</option>
-                <option value="Παραγγελία">Παραγγελία</option>
-                <option value="Δελτίο Αποστολής">Δελτίο Αποστολής</option>
-                <option value="Τιμολόγιο">Τιμολόγιο</option>
-                <option value="Απόδειξη">Απόδειξη</option>
-                <option value="Πιστωτικό">Πιστωτικό</option>
-              </select>
-              {errors.stage && <span className="error-message">{errors.stage}</span>}
-            </div>
-
-            {/* Στοιχεία Παραστατικού */}
-            <div className="type-specific-fields">
-              <h3>🧾 Στοιχεία Παραστατικού</h3>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Αριθμός Παραστατικού</label>
-                  <input
-                    type="text"
-                    value={formData.deliveryDetails.quantity}
-                    onChange={(e) => handleDeliveryChange('quantity', e.target.value)}
-                    placeholder="π.χ. #001234"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Συνολικό Ποσό (€)</label>
-                  <input
-                    type="text"
-                    value={formData.deliveryDetails.type}
-                    onChange={(e) => handleDeliveryChange('type', e.target.value)}
-                    placeholder="π.χ. 1,500.00"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Ημερομηνία Πληρωμής */}
-            <div className="form-group">
-              <label>Ημερομηνία Πληρωμής</label>
-              <input
-                type="text"
-                name="startEndDates"
-                value={formData.startEndDates}
-                onChange={handleInputChange}
-                placeholder="π.χ. 2024-02-15 (αν έχει πληρωθεί)"
-              />
-            </div>
-
-            {/* Σημειώσεις */}
-            <div className="form-group">
-              <label>Σημειώσεις/Λεπτομέρειες</label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Προσθέστε λεπτομέρειες για το παραστατικό (π.χ. περιγραφή εργασιών, όροι πληρωμής)..."
               />
             </div>
           </>

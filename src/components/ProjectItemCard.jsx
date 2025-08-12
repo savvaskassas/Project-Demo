@@ -1,6 +1,7 @@
 import React from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { generateInvoiceHTML } from './InvoiceGenerator';
 import './ProjectItemCard.css';
 
 const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
@@ -108,42 +109,41 @@ const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
       tempDiv.innerHTML = generateInvoiceHTML(invoiceData);
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm'; // A4 width
+      tempDiv.style.top = '0px';
+      tempDiv.style.width = '794px'; // A4 width in pixels (210mm)
+      tempDiv.style.minHeight = '1123px'; // A4 height in pixels (297mm)
       tempDiv.style.background = 'white';
+      tempDiv.style.padding = '20px';
+      tempDiv.style.boxSizing = 'border-box';
       document.body.appendChild(tempDiv);
 
-      // Generate canvas from HTML
-      const canvas = await html2canvas(tempDiv.querySelector('body'), {
-        scale: 2,
+      // Wait for content to render
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Generate canvas from HTML with better settings
+      const canvas = await html2canvas(tempDiv, {
+        scale: 1,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
-        height: tempDiv.scrollHeight,
-        width: tempDiv.scrollWidth
+        width: 794,
+        height: 1123,
+        scrollX: 0,
+        scrollY: 0,
+        allowTaint: false,
+        removeContainer: false
       });
 
       // Remove temporary div
       document.body.removeChild(tempDiv);
 
-      // Create PDF
+      // Create PDF with correct dimensions
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/png', 1.0);
       
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      // Calculate scaling
-      const ratio = Math.min(pdfWidth / (imgWidth * 0.264583), pdfHeight / (imgHeight * 0.264583));
-      const scaledWidth = (imgWidth * 0.264583) * ratio;
-      const scaledHeight = (imgHeight * 0.264583) * ratio;
-      
-      const imgX = (pdfWidth - scaledWidth) / 2;
-      const imgY = 10; // Small margin from top
+      // Add image to PDF at full A4 size
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
 
-      pdf.addImage(imgData, 'PNG', imgX, imgY, scaledWidth, scaledHeight);
-      
       // Save PDF
       const docType = invoiceData.type === 'invoice' ? 'Τιμολόγιο' : 
                      invoiceData.type === 'receipt' ? 'Απόδειξη' :
@@ -332,25 +332,6 @@ const ProjectItemCard = ({ item, onEdit, onDelete, isCompact = false }) => {
           <button className="delete-item-btn" onClick={onDelete} title="Διαγραφή">
             🗑️
           </button>
-          {/* Κουμπιά για παραστατικά */}
-          {item.type === 'invoice' && item.invoiceData && (
-            <>
-              <button 
-                className="print-invoice-btn" 
-                onClick={() => handlePrintInvoice(item.invoiceData)} 
-                title="Εκτύπωση Παραστατικού"
-              >
-                🖨️
-              </button>
-              <button 
-                className="pdf-invoice-btn" 
-                onClick={() => handleExportPDF(item.invoiceData)} 
-                title="Εξαγωγή σε PDF"
-              >
-                📄
-              </button>
-            </>
-          )}
         </div>
       </div>
 

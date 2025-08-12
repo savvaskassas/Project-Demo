@@ -112,6 +112,10 @@ const Dashboard = () => {
   useEffect(() => {
     if (projects.length > 0) {
       localStorage.setItem('projectManagementData', JSON.stringify(projects));
+      console.log('💾 Δεδομένα αποθηκεύτηκαν στο localStorage:', {
+        projectsCount: projects.length,
+        timestamp: new Date().toISOString()
+      });
     }
   }, [projects]);
 
@@ -203,14 +207,24 @@ const Dashboard = () => {
   };
 
   const handleAddItemToProject = (projectId, itemData) => {
-    console.log('handleAddItemToProject called with:', { projectId, itemData });
     const updatedProjects = projects.map(project => {
       if (project.id === projectId) {
+        // Δημιουργία μοναδικού ID για το νέο στοιχείο
+        const timestamp = Date.now();
         const newItem = {
           ...itemData,
-          id: (project.items?.length || 0) + 1
+          id: `item-${timestamp}`,
+          createdAt: new Date().toISOString(),
+          projectId: projectId
         };
-        console.log('Adding new item:', newItem);
+        
+        console.log('📝 Προσθήκη νέου στοιχείου στο έργο:', {
+          projectId,
+          itemType: newItem.type,
+          itemTitle: newItem.title,
+          newItemId: newItem.id
+        });
+        
         return {
           ...project,
           items: [...(project.items || []), newItem],
@@ -219,8 +233,12 @@ const Dashboard = () => {
       }
       return project;
     });
-    console.log('Updated projects:', updatedProjects);
     setProjects(updatedProjects);
+    
+    console.log('✅ Έργα ενημερώθηκαν στο Dashboard:', {
+      totalProjects: updatedProjects.length,
+      selectedProjectItems: updatedProjects.find(p => p.id === projectId)?.items?.length || 0
+    });
   };
 
   const handleUpdateItem = (projectId, itemId, updatedItem) => {
