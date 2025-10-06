@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ProjectForm from './ProjectForm';
 import ProjectCard from './ProjectCard';
@@ -18,6 +18,12 @@ const Dashboard = () => {
   const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
   const [isCompactView, setIsCompactView] = useState(false);
   const [showOverview, setShowOverview] = useState(false);
+  // Νέα φίλτρα για μεγάλο όγκο δεδομένων
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedCollaborator, setSelectedCollaborator] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedPriority, setSelectedPriority] = useState('all');
 
   // Φόρτωση δεδομένων από localStorage ή χρήση mock data
   useEffect(() => {
@@ -121,22 +127,114 @@ const Dashboard = () => {
     }
   }, [projects]);
 
-  // Φιλτράρισμα έργων βάσει αναζήτησης και ημερομηνιών
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = searchTerm === '' || 
-      project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.projectStage.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.assignedCollaborators.some(collaborator => 
-        collaborator.toLowerCase().includes(searchTerm.toLowerCase())
+  // Προχωρημένο φιλτράρισμα και ταξινόμηση για μεγάλο όγκο δεδομένων
+  const filteredProjects = React.useMemo(() => {
+    let filtered = [...projects];
+
+    // Φιλτράρισμα κειμένου
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(project => 
+        project.projectTitle.toLowerCase().includes(searchLower) ||
+        project.client.toLowerCase().includes(searchLower) ||
+        project.projectStage.toLowerCase().includes(searchLower) ||
+        project.assignedCollaborators?.some(collaborator => 
+          collaborator.toLowerCase().includes(searchLower)
+        )
       );
+    }
 
-    const matchesDateFilter = 
-      (dateFilter.start === '' || new Date(project.startDate) >= new Date(dateFilter.start)) &&
-      (dateFilter.end === '' || new Date(project.endDate) <= new Date(dateFilter.end));
+    // Φιλτράρισμα κατά κατάσταση
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter(project => {
+        switch (selectedStatus) {
+          case 'active':
+            return project.projectStage !== 'Ολοκληρωμένο' && project.projectStage !== 'Ακυρωμένο';
+          case 'completed':
+            return project.projectStage === 'Ολοκληρωμένο';
+          case 'planning':
+            return ['Προγραμματισμός', 'Σχεδιασμός'].includes(project.projectStage);
+          case 'development':
+            return ['Ανάπτυξη', 'Εγκατάσταση'].includes(project.projectStage);
+          case 'overdue':
+            const today = new Date();
+            const endDate = new Date(project.endDate);
+            return endDate < today && project.projectStage !== 'Ολοκληρωμένο';
+          default:
+            return true;
+        }
+      });
+    }
 
-    return matchesSearch && matchesDateFilter;
-  });
+    // Φιλτράρισμα κατά συνεργάτη
+    if (selectedCollaborator !== 'all') {
+      filtered = filtered.filter(project => 
+        project.assignedCollaborators?.includes(selectedCollaborator)
+      );
+    }
+
+    // Φιλτράρισμα ημερομηνιών
+    if (dateFilter.start) {
+      filtered = filtered.filter(project => 
+        new Date(project.startDate) >= new Date(dateFilter.start)
+      );
+    }
+    if (dateFilter.end) {
+      filtered = filtered.filter(project => 
+        new Date(project.endDate) <= new Date(dateFilter.end)
+      );
+    }
+
+    // Ταξινόμηση
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortBy) {
+        case 'date':
+          aValue = new Date(a.startDate);
+          bValue = new Date(b.startDate);
+          break;
+        case 'title':
+          aValue = a.projectTitle.toLowerCase();
+          bValue = b.projectTitle.toLowerCase();
+          break;
+        case 'client':
+          aValue = a.client.toLowerCase();
+          bValue = b.client.toLowerCase();
+          break;
+        case 'status':
+          aValue = a.projectStage;
+          bValue = b.projectStage;
+          break;
+        case 'updated':
+          aValue = new Date(a.updatedAt || a.startDate);
+          bValue = new Date(b.updatedAt || b.startDate);
+          break;
+        default:
+          aValue = a.startDate;
+          bValue = b.startDate;
+      }
+
+      if (sortOrder === 'desc') {
+        return aValue > bValue ? -1 : 1;
+      } else {
+        return aValue > bValue ? 1 : -1;
+      }
+    });
+
+    return filtered;
+  }, [projects, searchTerm, selectedStatus, selectedCollaborator, dateFilter, sortBy, sortOrder]);
+
+  // Δημιουργία λιστών για dropdowns
+  const allCollaborators = React.useMemo(() => {
+    const collaborators = new Set();
+    projects.forEach(project => {
+      project.assignedCollaborators?.forEach(collaborator => {
+        collaborators.add(collaborator);
+      });
+    });
+    return Array.from(collaborators).sort();
+  }, [projects]);
 
   const handleCreateProject = (projectData) => {
     const newProject = {
@@ -359,46 +457,153 @@ const Dashboard = () => {
               </div>
             </div>
             
-            <div className="search-filters">
-              <div className="search-bar">
-                <input
-                  type="text"
-                  placeholder="🔍 Αναζήτηση έργων (τίτλος, πελάτης, στάδιο, συνεργάτες)..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                />
-              </div>
-              
-              <div className="date-filters">
-                <div className="date-filter-group">
-                  <label>Από:</label>
+            <div className="advanced-filters">
+              {/* Πρώτη σειρά φίλτρων */}
+              <div className="filters-row primary">
+                <div className="search-section">
                   <input
-                    type="date"
-                    value={dateFilter.start}
-                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
-                    className="date-input"
+                    type="text"
+                    placeholder="🔍 Αναζήτηση έργων (τίτλος, πελάτης, στάδιο, συνεργάτες)..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input enhanced"
                   />
                 </div>
-                <div className="date-filter-group">
-                  <label>Έως:</label>
-                  <input
-                    type="date"
-                    value={dateFilter.end}
-                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
-                    className="date-input"
-                  />
+                
+                <div className="quick-filters">
+                  <button 
+                    className={`quick-filter-btn ${selectedStatus === 'active' ? 'active' : ''}`}
+                    onClick={() => setSelectedStatus(selectedStatus === 'active' ? 'all' : 'active')}
+                  >
+                    🟢 Ενεργά ({projects.filter(p => p.projectStage !== 'Ολοκληρωμένο' && p.projectStage !== 'Ακυρωμένο').length})
+                  </button>
+                  <button 
+                    className={`quick-filter-btn ${selectedStatus === 'completed' ? 'active' : ''}`}
+                    onClick={() => setSelectedStatus(selectedStatus === 'completed' ? 'all' : 'completed')}
+                  >
+                    ✅ Ολοκληρωμένα ({projects.filter(p => p.projectStage === 'Ολοκληρωμένο').length})
+                  </button>
+                  <button 
+                    className={`quick-filter-btn ${selectedStatus === 'overdue' ? 'active' : ''}`}
+                    onClick={() => setSelectedStatus(selectedStatus === 'overdue' ? 'all' : 'overdue')}
+                  >
+                    ⚠️ Καθυστερημένα
+                  </button>
                 </div>
-                <button 
-                  className="clear-filters-btn"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setDateFilter({ start: '', end: '' });
-                  }}
-                >
-                  🗑️ Καθαρισμός
-                </button>
               </div>
+
+              {/* Δεύτερη σειρά φίλτρων */}
+              <div className="filters-row secondary">
+                <div className="filter-group">
+                  <label className="filter-label">Κατάσταση:</label>
+                  <select 
+                    value={selectedStatus} 
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="all">Όλες οι καταστάσεις</option>
+                    <option value="active">Ενεργά έργα</option>
+                    <option value="completed">Ολοκληρωμένα</option>
+                    <option value="planning">Σχεδιασμός</option>
+                    <option value="development">Ανάπτυξη</option>
+                    <option value="overdue">Καθυστερημένα</option>
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Συνεργάτης:</label>
+                  <select 
+                    value={selectedCollaborator} 
+                    onChange={(e) => setSelectedCollaborator(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="all">Όλοι οι συνεργάτες</option>
+                    {allCollaborators.map(collaborator => (
+                      <option key={collaborator} value={collaborator}>
+                        {collaborator}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Ταξινόμηση:</label>
+                  <select 
+                    value={sortBy} 
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="date">Ημερομηνία Έναρξης</option>
+                    <option value="updated">Τελευταία Ενημέρωση</option>
+                    <option value="title">Όνομα Έργου</option>
+                    <option value="client">Πελάτης</option>
+                    <option value="status">Κατάσταση</option>
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label className="filter-label">Σειρά:</label>
+                  <select 
+                    value={sortOrder} 
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="desc">Φθίνουσα</option>
+                    <option value="asc">Αύξουσα</option>
+                  </select>
+                </div>
+
+                <div className="date-range-group">
+                  <div className="date-filter-group">
+                    <label className="filter-label">Από:</label>
+                    <input
+                      type="date"
+                      value={dateFilter.start}
+                      onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
+                      className="date-input"
+                    />
+                  </div>
+                  <div className="date-filter-group">
+                    <label className="filter-label">Έως:</label>
+                    <input
+                      type="date"
+                      value={dateFilter.end}
+                      onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
+                      className="date-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="filter-actions">
+                  <button 
+                    className="clear-filters-btn"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedStatus('all');
+                      setSelectedCollaborator('all');
+                      setDateFilter({ start: '', end: '' });
+                      setSortBy('date');
+                      setSortOrder('desc');
+                    }}
+                  >
+                    🗑️ Καθαρισμός
+                  </button>
+                </div>
+              </div>
+
+              {/* Αποτελέσματα φιλτραρίσματος */}
+              {(searchTerm || selectedStatus !== 'all' || selectedCollaborator !== 'all' || dateFilter.start || dateFilter.end) && (
+                <div className="filter-results">
+                  <span className="results-text">
+                    Εμφάνιση {filteredProjects.length} από {projects.length} έργα
+                  </span>
+                  {filteredProjects.length === 0 && (
+                    <span className="no-results">
+                      Δεν βρέθηκαν έργα που να ταιριάζουν με τα κριτήρια
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {filteredProjects.length === 0 ? (

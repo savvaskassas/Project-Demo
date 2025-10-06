@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 import { el } from 'date-fns/locale';
 
@@ -542,4 +543,111 @@ class ExcelExportService {
       clients[client] = (clients[client] || 0) + 1;
     });
 
-    return Obj
+    return Object.entries(clients)
+      .sort(([,a], [,b]) => b - a)
+      .map(([client, count]) => ({
+        'Πελάτης': client,
+        'Αριθμός Έργων': count,
+        'Ποσοστό': `${Math.round((count / projects.length) * 100)}%`
+      }));
+  }
+
+  static calculateTimeStats(projects) {
+    const currentYear = new Date().getFullYear();
+    const months = {};
+
+    projects.forEach(project => {
+      const startDate = new Date(project.startDate);
+      if (startDate.getFullYear() === currentYear) {
+        const monthName = startDate.toLocaleDateString('el-GR', { month: 'long' });
+        months[monthName] = (months[monthName] || 0) + 1;
+      }
+    });
+
+    return Object.entries(months).map(([month, count]) => ({
+      'Μήνας': month,
+      'Νέα Έργα': count
+    }));
+  }
+
+  // Βοηθητικές μέθοδοι για τις νέες λειτουργίες
+
+  static formatDateDDMMYYYY(dateString) {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '';
+    }
+  }
+
+  static groupProjectsByMonth(projects) {
+    const monthlyData = {};
+    
+    projects.forEach(project => {
+      const date = new Date(project.startDate);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('el-GR', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          month: monthName,
+          newProjects: 0,
+          completedProjects: 0,
+          revenue: 0,
+          collected: 0,
+          pending: 0
+        };
+      }
+
+      monthlyData[monthKey].newProjects++;
+      
+      if (project.projectStage === 'Ολοκληρωμένο') {
+        monthlyData[monthKey].completedProjects++;
+      }
+
+      const budget = project.budget || 0;
+      const paid = project.paidAmount || 0;
+      
+      monthlyData[monthKey].revenue += budget;
+      monthlyData[monthKey].collected += paid;
+      monthlyData[monthKey].pending += (budget - paid);
+    });
+
+    return Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
+  }
+
+  static calculateProjectBudget(project) {
+    // Υπολογισμός προϋπολογισμού από υλικά και εργασία
+    const materialsCost = (project.materials || []).reduce((sum, material) => {
+      return sum + ((material.quantity || 0) * (material.unitPrice || 0));
+    }, 0);
+    
+    const laborCost = project.laborCost || 0;
+    const overheadCost = project.overheadCost || 0;
+    
+    return project.budget || (materialsCost + laborCost + overheadCost) || 45000; // Default value for demo
+  }
+
+  static calculateProjectPaid(project) {
+    // Υπολογισμός εισπραχθέντων από πληρωμές
+    const paymentsTotal = (project.payments || []).reduce((sum, payment) => {
+      return sum + (payment.amount || 0);
+    }, 0);
+    
+    return project.paidAmount || paymentsTotal || (this.calculateProjectBudget(project) * 0.3); // Default 30% for demo
+  }
+}
+
+export default ExcelExportService;
