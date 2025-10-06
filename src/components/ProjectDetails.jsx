@@ -3,6 +3,7 @@ import ProjectItemForm from './ProjectItemForm';
 import ProjectItemCard from './ProjectItemCard';
 import ProjectNotes from './ProjectNotes';
 import InvoiceGenerator from './InvoiceGenerator';
+import { ExportButtons } from './Export';
 import './ProjectDetails.css';
 
 const ProjectDetails = ({ 
@@ -327,6 +328,14 @@ const ProjectDetails = ({
           </div>
         )}
       </div>
+
+      {/* Export Options for specific project */}
+      <ExportButtons 
+        projects={[project]}
+        selectedProject={project}
+        showProjectSpecific={true}
+        className="project-export-section"
+      />
 
       {/* Project Notes */}
       <ProjectNotes 

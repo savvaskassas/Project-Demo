@@ -1,0 +1,189 @@
+/* Mini Chart Styles */
+.mini-chart {
+  display: inline-block;
+  position: relative;
+}
+
+/* Donut Chart */
+.mini-chart-container {
+  position: relative;
+  display: inline-block;
+}
+
+.donut-chart {
+  transform: rotate(-90deg);
+}
+
+.animated-stroke {
+  stroke-dasharray: 0;
+  animation: drawStroke 1.5s ease-out forwards;
+}
+
+@keyframes drawStroke {
+  to {
+    stroke-dasharray: inherit;
+  }
+}
+
+.chart-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.chart-total {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  line-height: 1;
+}
+
+.chart-unit {
+  font-size: 0.6rem;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Bar Chart */
+.mini-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 2px;
+  padding: 2px;
+}
+
+.bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 8px;
+}
+
+.bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  transition: all 0.3s ease;
+  animation: growBar 0.8s ease-out;
+}
+
+@keyframes growBar {
+  from { height: 0 !important; }
+  to { height: inherit; }
+}
+
+.bar-label {
+  font-size: 0.5rem;
+  color: var(--gray-600);
+  margin-top: 2px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bar:hover {
+  filter: brightness(1.1);
+  transform: scaleY(1.05);
+}
+
+/* Line Chart */
+.mini-line-chart {
+  position: relative;
+}
+
+.animated-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 2s ease-out forwards;
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animated-point {
+  opacity: 0;
+  animation: fadeInPoint 0.5s ease-out forwards;
+}
+
+.animated-point:nth-child(2) { animation-delay: 0.2s; }
+.animated-point:nth-child(3) { animation-delay: 0.4s; }
+.animated-point:nth-child(4) { animation-delay: 0.6s; }
+.animated-point:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes fadeInPoint {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sparkline */
+.mini-sparkline {
+  display: inline-block;
+}
+
+.sparkline-svg {
+  display: block;
+}
+
+.animated-sparkline {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawSparkline 1.5s ease-out forwards;
+}
+
+@keyframes drawSparkline {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Hover Effects */
+.mini-chart:hover .bar {
+  filter: brightness(1.1);
+}
+
+.mini-chart:hover .animated-stroke {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
+}
+
+.mini-chart:hover .animated-path,
+.mini-chart:hover .animated-sparkline {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .chart-total {
+    font-size: 0.8rem;
+  }
+  
+  .chart-unit {
+    font-size: 0.5rem;
+  }
+  
+  .bar-label {
+    font-size: 0.4rem;
+  }
+}
+
+/* Accessibility */
+.mini-chart [title] {
+  cursor: help;
+}
+
+.mini-chart:focus-within {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

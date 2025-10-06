@@ -82,11 +82,13 @@
 .delete-btn,
 .complete-btn,
 .reopen-btn {
-  padding: 12px 20px;
+  padding: 12px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 16px;
   font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -143,8 +145,8 @@
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border: 2px solid #e9ecef;
   border-radius: 15px;
-  padding: 30px;
-  margin-bottom: 30px;
+  padding: 32px;
+  margin-bottom: 32px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   position: relative;
   overflow: hidden;
@@ -169,20 +171,24 @@
 }
 
 .project-title-details {
-  font-size: 2rem;
+  font-size: 32px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
   flex: 1;
 }
 
 .project-stage-details {
   background: #ff7700;
   color: white;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 25px;
-  font-size: 0.9rem;
+  font-size: 16px;
   font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   box-shadow: 0 4px 15px rgba(255, 119, 0, 0.3);
   white-space: nowrap;
 }
@@ -190,7 +196,7 @@
 .project-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
+  gap: 24px;
 }
 
 .info-card {
@@ -210,18 +216,22 @@
 
 .info-card h3 {
   color: #1a1a1a;
-  font-size: 1.1rem;
+  font-size: 18px;
   font-weight: 600;
-  margin: 0 0 15px 0;
+  line-height: 1.44;
+  letter-spacing: -0.005em;
+  margin: 0 0 12px 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .info-card p {
-  color: #555;
+  color: #6b7280;
   margin: 0;
+  font-size: 16px;
   line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
 .collaborators-list-details {
@@ -275,8 +285,10 @@
 
 .section-header h2 {
   color: #1a1a1a;
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 600;
+  line-height: 1.33;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 

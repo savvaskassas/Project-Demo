@@ -9,11 +9,10 @@
 .dashboard-content {
   flex: 1;
   display: flex;
-  max-width: 1500px;
-  margin: 0 auto;
   width: 100%;
-  padding: 30px;
-  gap: 30px;
+  margin: 0;
+  padding: 20px;
+  gap: 20px;
 }
 
 .dashboard-nav {
@@ -24,7 +23,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   height: fit-content;
   position: sticky;
-  top: 30px;
+  top: 20px;
   border: 1px solid rgba(135, 206, 235, 0.1);
 }
 
@@ -82,13 +81,34 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
+/* Overview Button Special Styling */
+.nav-btn:last-child {
+  background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-50) 100%);
+  border-color: var(--primary-200);
+  color: var(--primary-700);
+  margin-top: var(--space-2);
+}
+
+.nav-btn:last-child:hover {
+  background: linear-gradient(135deg, var(--primary-200) 0%, var(--primary-100) 100%);
+  border-color: var(--primary-300);
+  color: var(--primary-800);
+}
+
+.nav-btn:last-child.active {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-400) 100%);
+  border-color: var(--primary-600);
+  color: white;
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4);
+}
+
 .dashboard-main {
   flex: 1;
   background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
   border-radius: 25px;
-  padding: 40px;
+  padding: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  min-height: 80vh;
+  min-height: calc(100vh - 60px);
   border: 1px solid rgba(135, 206, 235, 0.1);
   position: relative;
   overflow: hidden;
@@ -352,6 +372,22 @@
   margin: 0;
 }
 
+/* Overview Section */
+.overview-section {
+  width: 100%;
+  padding: var(--space-2);
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  min-height: 80vh;
+}
+
+.overview-section .dashboard-stats {
+  margin-bottom: 0;
+  box-shadow: 0 6px 20px rgba(17, 24, 39, 0.1);
+  border: 2px solid var(--border-light);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .dashboard-content {
@@ -385,6 +421,7 @@
 @media (max-width: 768px) {
   .dashboard-content {
     padding: 10px;
+    gap: 10px;
   }
   
   .projects-header {

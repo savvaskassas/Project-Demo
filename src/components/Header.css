@@ -1,9 +1,9 @@
 .company-header {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
   color: white;
   padding: 25px 0;
-  border-bottom: 4px solid #ff7700;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border-bottom: 3px solid var(--primary-500);
+  box-shadow: 0 4px 16px rgba(17, 24, 39, 0.3);
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px);
@@ -16,7 +16,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(135, 206, 235, 0.08) 0%, transparent 60%, rgba(255, 119, 0, 0.05) 100%);
+  background: linear-gradient(45deg, rgba(59, 130, 246, 0.05) 0%, transparent 60%, rgba(249, 115, 22, 0.03) 100%);
   pointer-events: none;
 }
 
@@ -35,11 +35,17 @@
   display: flex;
   align-items: center;
   gap: 25px;
-  transition: transform 0.3s ease;
+  transition: transform var(--duration-normal) var(--ease-smooth);
+  cursor: pointer;
 }
 
 .logo-section:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.logo-section:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: var(--duration-fast);
 }
 
 .logo-container {
@@ -49,27 +55,27 @@
 .logo-circle {
   width: 85px;
   height: 85px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-  border: 3px solid #87ceeb;
+  background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+  border: 3px solid var(--secondary-400);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(17, 24, 39, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .logo-circle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 25px rgba(17, 24, 39, 0.4);
 }
 
 .logo-text-top {
   font-size: 7px;
   font-weight: bold;
-  color: #ff7700;
+  color: var(--primary-500);
   letter-spacing: 0.5px;
   line-height: 1;
   margin-bottom: 2px;
@@ -79,7 +85,7 @@
 .logo-text-bottom {
   font-size: 7px;
   font-weight: bold;
-  color: #ff7700;
+  color: var(--primary-500);
   letter-spacing: 0.5px;
   line-height: 1;
   margin-bottom: 4px;
@@ -89,7 +95,7 @@
 .logo-k {
   font-size: 24px;
   font-weight: bold;
-  color: #ff7700;
+  color: var(--primary-500);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   margin-top: 2px;
 }
@@ -99,24 +105,26 @@
 }
 
 .company-name {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 700;
   margin: 0;
-  background: linear-gradient(45deg, #ff7700, #ffaa44, #87ceeb);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  background: linear-gradient(45deg, var(--primary-500), var(--primary-400), var(--secondary-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 1.2px;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .company-tagline {
-  font-size: 0.95rem;
-  color: #87ceeb;
+  font-size: 16px;
+  color: var(--secondary-300);
   margin: 8px 0 0 0;
   font-weight: 400;
-  letter-spacing: 0.8px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   font-style: italic;
   opacity: 0.9;
 }
@@ -130,19 +138,19 @@
   display: flex;
   align-items: center;
   gap: 25px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   padding: 15px 20px;
   border-radius: 15px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(135, 206, 235, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   transition: all 0.3s ease;
 }
 
 .user-info:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(135, 206, 235, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.25);
 }
 
 .user-details {
@@ -153,36 +161,42 @@
 }
 
 .user-name {
-  font-size: 1.1rem;
+  font-size: 18px;
   font-weight: 600;
   color: #ffffff;
+  line-height: 1.44;
+  letter-spacing: -0.005em;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .user-role {
-  font-size: 0.85rem;
-  color: #87ceeb;
+  font-size: 14px;
+  color: var(--secondary-300);
   font-weight: 500;
-  background: rgba(135, 206, 235, 0.1);
+  line-height: 1.57;
+  letter-spacing: 0;
+  background: rgba(59, 130, 246, 0.15);
   padding: 4px 8px;
   border-radius: 12px;
-  border: 1px solid rgba(135, 206, 235, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.25);
 }
 
 .logout-btn {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  background: linear-gradient(135deg, var(--error-500) 0%, #dc2626 100%);
   color: white;
   border: none;
   padding: 12px 20px;
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 16px;
   font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 3px 12px rgba(239, 68, 68, 0.25);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -206,9 +220,9 @@
 }
 
 .logout-btn:hover {
-  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.5);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
 }
 
 .logout-btn:active {

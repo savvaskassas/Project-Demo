@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import InvoiceCard from './InvoiceCard';
+import ExcelExportService from '../utils/ExcelExportService';
 import './InvoiceList.css';
 
 const InvoiceList = ({ 
@@ -119,6 +120,16 @@ const InvoiceList = ({
     }
   };
 
+  const handleExportToExcel = () => {
+    try {
+      ExcelExportService.exportInvoicesToExcel(filteredInvoices, 'invoices_export');
+      alert('✅ Η εξαγωγή παραστατικών σε Excel ολοκληρώθηκε επιτυχώς!');
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('❌ Σφάλμα κατά την εξαγωγή σε Excel. Παρακαλώ δοκιμάστε ξανά.');
+    }
+  };
+
   return (
     <div className="invoice-list-container">
       <div className="invoice-list-header">
@@ -127,9 +138,18 @@ const InvoiceList = ({
           <p>Διαχειριστείτε όλα τα παραστατικά σας σε ένα μέρος</p>
         </div>
         
-        <button className="new-invoice-btn" onClick={onNewInvoice}>
-          ➕ Νέο Παραστατικό
-        </button>
+        <div className="header-actions">
+          <button 
+            className="export-excel-btn" 
+            onClick={handleExportToExcel}
+            title="Εξαγωγή παραστατικών σε Excel"
+          >
+            📊 Εξαγωγή Excel
+          </button>
+          <button className="new-invoice-btn" onClick={onNewInvoice}>
+            ➕ Νέο Παραστατικό
+          </button>
+        </div>
       </div>
 
       {/* Στατιστικά */}

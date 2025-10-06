@@ -4,6 +4,7 @@ import ProjectForm from './ProjectForm';
 import ProjectCard from './ProjectCard';
 import ProjectDetails from './ProjectDetails';
 import Header from './Header';
+import ProjectOverview from './ProjectOverview';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
   const [isCompactView, setIsCompactView] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
 
   // Φόρτωση δεδομένων από localStorage ή χρήση mock data
   useEffect(() => {
@@ -282,6 +284,10 @@ const Dashboard = () => {
             onCancel={() => setCurrentView('projects')}
           />
         );
+      case 'overview':
+        return (
+          <ProjectOverview projects={projects} />
+        );
       case 'edit':
         return (
           <ProjectForm 
@@ -446,6 +452,16 @@ const Dashboard = () => {
             onClick={() => setCurrentView('create')}
           >
             ➕ Νέο Έργο
+          </button>
+          <button 
+            className={`nav-btn ${currentView === 'overview' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentView('overview');
+              setSelectedProject(null);
+              setEditingProject(null);
+            }}
+          >
+            📊 Επισκόπηση
           </button>
         </nav>
 

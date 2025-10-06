@@ -1,0 +1,311 @@
+/* Enhanced Progress Bar Styles */
+.progress-container {
+  width: 100%;
+  margin-bottom: var(--space-2);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.progress-percentage {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.progress-value {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin-top: var(--space-1);
+}
+
+/* Progress Bar Base */
+.progress-bar {
+  width: 100%;
+  background: var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Size Variants */
+.progress-small .progress-bar {
+  height: 6px;
+  border-radius: var(--radius-sm);
+}
+
+.progress-medium .progress-bar {
+  height: 10px;
+  border-radius: var(--radius-md);
+}
+
+.progress-large .progress-bar {
+  height: 16px;
+  border-radius: var(--radius-lg);
+}
+
+.progress-xl .progress-bar {
+  height: 24px;
+  border-radius: var(--radius-xl);
+}
+
+/* Progress Fill */
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+  border-radius: inherit;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Color Variants */
+.progress-primary .progress-fill {
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+}
+
+.progress-success .progress-fill {
+  background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+.progress-warning .progress-fill {
+  background: linear-gradient(90deg, #ffc107, #ffcd39);
+}
+
+.progress-danger .progress-fill {
+  background: linear-gradient(90deg, #dc3545, #e14eca);
+}
+
+.progress-info .progress-fill {
+  background: linear-gradient(90deg, #17a2b8, #20c997);
+}
+
+.progress-secondary .progress-fill {
+  background: linear-gradient(90deg, var(--secondary-500), var(--secondary-400));
+}
+
+/* Animation Effects */
+.progress-bar.animated .progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-shine {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.progress-glow {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  height: calc(100% + 4px);
+  background: inherit;
+  border-radius: inherit;
+  filter: blur(4px);
+  opacity: 0.6;
+  z-index: -1;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Striped Pattern */
+.progress-bar.striped .progress-fill {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 20px 20px;
+}
+
+.progress-bar.striped.animated .progress-fill {
+  animation: stripes 1s linear infinite;
+}
+
+@keyframes stripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 20px 0; }
+}
+
+/* Stage Indicators */
+.progress-stages {
+  position: relative;
+  margin-top: var(--space-2);
+  height: 30px;
+}
+
+.stage-indicator {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.stage-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gray-300);
+  border: 2px solid var(--gray-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+  margin-bottom: 4px;
+}
+
+.stage-indicator.completed .stage-dot {
+  background: #28a745;
+  border-color: #1e7e34;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.stage-indicator.current .stage-dot {
+  background: var(--primary-500);
+  border-color: var(--primary-600);
+  color: white;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+  transform: scale(1.2);
+}
+
+.stage-check {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.stage-pulse {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--primary-500);
+  border-radius: 50%;
+  animation: stagePulse 2s infinite;
+}
+
+@keyframes stagePulse {
+  0% { transform: scale(1); opacity: 1; }
+  70% { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.stage-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  text-align: center;
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.3s ease;
+}
+
+.stage-indicator.completed .stage-label {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.stage-indicator.current .stage-label {
+  color: var(--primary-600);
+  font-weight: 700;
+}
+
+.stage-indicator:hover .stage-label {
+  color: var(--gray-800);
+}
+
+/* Hover Effects */
+.stage-indicator:hover .stage-dot {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stage-indicator.current:hover .stage-dot {
+  transform: scale(1.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .progress-stages {
+    height: 25px;
+    margin-top: var(--space-1);
+  }
+  
+  .stage-dot {
+    width: 12px;
+    height: 12px;
+    margin-bottom: 2px;
+  }
+  
+  .stage-label {
+    font-size: 0.6rem;
+    max-width: 60px;
+  }
+  
+  .stage-check {
+    font-size: 8px;
+  }
+  
+  .progress-header {
+    margin-bottom: 4px;
+  }
+  
+  .progress-label,
+  .progress-percentage {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stage-label {
+    display: none;
+  }
+  
+  .progress-stages {
+    height: 20px;
+  }
+  
+  .stage-dot {
+    width: 10px;
+    height: 10px;
+  }
+}

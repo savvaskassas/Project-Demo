@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './ProjectCard.css';
 import './PhotoSlider.css';
 import NotesChart from './NotesChart';
+import StatusIndicator from './StatusIndicator';
+import ProgressBar from './ProgressBar';
 
 const ProjectCard = ({ project, onClick, isCompact = false }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -19,6 +21,64 @@ const ProjectCard = ({ project, onClick, isCompact = false }) => {
       'Ολοκληρωμένο': '#28a745'
     };
     return colors[stage] || '#6c757d';
+  };
+
+  // Υπολογισμός προόδου έργου
+  const getProjectProgress = () => {
+    const stageOrder = [
+      'Προγραμματισμός',
+      'Ανάλυση Απαιτήσεων', 
+      'Σχεδιασμός',
+      'Ανάπτυξη',
+      'Δοκιμές',
+      'Παράδοση',
+      'Ολοκληρωμένο'
+    ];
+    
+    const currentStageIndex = stageOrder.indexOf(project.projectStage);
+    if (currentStageIndex === -1) return 0;
+    
+    return Math.round(((currentStageIndex + 1) / stageOrder.length) * 100);
+  };
+
+  // Λήψη icon ανάλογα με το στάδιο
+  const getStageIcon = (stage) => {
+    const icons = {
+      'Προγραμματισμός': '📋',
+      'Ανάλυση Απαιτήσεων': '🔍',
+      'Σχεδιασμός': '✏️',
+      'Ανάπτυξη': '🔨',
+      'Δοκιμές': '🧪',
+      'Παράδοση': '📦',
+      'Συντήρηση': '⚙️',
+      'Ολοκληρωμένο': '✅'
+    };
+    return icons[stage] || '📋';
+  };
+
+  // Υπολογισμός υγείας έργου
+  const getProjectHealth = () => {
+    const today = new Date();
+    const endDate = new Date(project.endDate);
+    const startDate = new Date(project.startDate);
+    
+    const totalDuration = endDate - startDate;
+    const elapsed = today - startDate;
+    const timeProgress = (elapsed / totalDuration) * 100;
+    
+    const stageProgress = getProjectProgress();
+    
+    if (project.projectStage === 'Ολοκληρωμένο') {
+      return { status: 'completed', icon: '✅', label: 'Ολοκληρωμένο' };
+    }
+    
+    if (timeProgress > stageProgress + 20) {
+      return { status: 'at-risk', icon: '⚠️', label: 'Σε Κίνδυνο' };
+    } else if (timeProgress > stageProgress + 10) {
+      return { status: 'behind', icon: '⏳', label: 'Καθυστέρηση' };
+    } else {
+      return { status: 'on-track', icon: '🟢', label: 'Εντάξει' };
+    }
   };
 
   const formatDate = (dateString) => {
@@ -131,13 +191,38 @@ const ProjectCard = ({ project, onClick, isCompact = false }) => {
       )}
 
       <div className="project-card-header">
-        <h3 className="project-title">{project.projectTitle}</h3>
-        <span 
-          className="project-stage"
-          style={{ backgroundColor: getStageColor(project.projectStage) }}
-        >
-          {project.projectStage}
-        </span>
+        <div className="title-section">
+          <h3 className="project-title">{project.projectTitle}</h3>
+          <div className="project-health">
+            <StatusIndicator 
+              status={getProjectHealth().status}
+              size="small"
+              showLabel={true}
+              animated={getProjectHealth().status === 'at-risk'}
+            />
+          </div>
+        </div>
+        <div className="stage-section">
+          <StatusIndicator 
+            status={project.projectStage}
+            size="medium"
+            showLabel={true}
+            animated={project.projectStage !== 'Ολοκληρωμένο'}
+          />
+        </div>
+      </div>
+
+      {/* Enhanced Progress Bar */}
+      <div className="project-progress-section">
+        <ProgressBar
+          value={getProjectProgress()}
+          label="Πρόοδος Έργου"
+          size="medium"
+          color="auto"
+          animated={true}
+          stages={['Προγραμματισμός', 'Σχεδιασμός', 'Ανάπτυξη', 'Δοκιμές', 'Παράδοση', 'Ολοκληρωμένο']}
+          currentStage={project.projectStage}
+        />
       </div>
 
       <div className="project-card-body">
